@@ -14,6 +14,7 @@ public class Principal {
 		List<String> professores = parser.recuperarProfessores();
 		List<String> classes = parser.recuperarClasses();
 		List<String> horarios = parser.recuperarHorarios();
+		parser.recuperarEventos();
 		
 		//String[] professores = {"P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "P13", "P14", "P15", "P16"};
 		//String[] turmas = {"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"};

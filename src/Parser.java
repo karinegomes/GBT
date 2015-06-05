@@ -104,10 +104,10 @@ public class Parser {
 	public List<String> recuperarHorarios() {
 		
 		List<String> horarios = new ArrayList<String>();
-		NodeList resources = raiz.getElementsByTagName("Time");
+		NodeList times = raiz.getElementsByTagName("Time");
 		
-		for(int j = 0; j < resources.getLength(); j++) {
-			Element resource = (Element) resources.item(j);
+		for(int j = 0; j < times.getLength(); j++) {
+			Element resource = (Element) times.item(j);
 			Attr id = resource.getAttributeNode("Id");
 			
 			if(id == null) {
@@ -133,6 +133,46 @@ public class Parser {
 		}
 		
 		return horarios;
+		
+	}
+	
+	public /*int[][]*/ void recuperarEventos() {
+		
+		int[][] eventos;
+		int linha, coluna = 0;
+		/*NodeList events = raiz.getElementsByTagName("Event");
+		
+		System.out.println(events.getLength());*/
+		
+		NodeList listEvents = raiz.getElementsByTagName("Events");
+		Element events = (Element) listEvents.item(0);
+		
+		System.out.println(events.getChildNodes().getLength());
+		NodeList listEvent = events.getElementsByTagName("Event");
+		
+		System.out.println(listEvent.getLength());
+		
+		// criar a matriz. acho q pode apagar o de baixo VVV
+		
+		/*for(int j = 0; j < events.getLength(); j++) {
+			Element event = (Element) events.item(j);
+			Attr id = event.getAttributeNode("Id");
+			
+			if(id == null) {
+				break;
+			}
+			
+			NodeList listNames = event.getElementsByTagName("Name");
+			Node name = listNames.item(0).getFirstChild();
+			
+			horarios.add(name.getNodeValue());
+		}
+		
+		for(String horario: horarios) {
+			System.out.println(horario);
+		}
+		
+		return horarios;*/
 		
 	}
 	
