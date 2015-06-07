@@ -60,9 +60,9 @@ public class Parser {
 			}
 		}
 		
-		for(String professor: professores) {
+		/*for(String professor: professores) {
 			System.out.println(professor);
-		}
+		}*/
 		
 		return professores;
 		
@@ -93,9 +93,9 @@ public class Parser {
 			}
 		}
 		
-		for(String classe: classes) {
+		/*for(String classe: classes) {
 			System.out.println(classe);
-		}
+		}*/
 		
 		return classes;
 		
@@ -118,61 +118,76 @@ public class Parser {
 			Node name = listNames.item(0).getFirstChild();
 			
 			horarios.add(name.getNodeValue());
-			
-			/*NodeList listResourceTypes = resource.getElementsByTagName("ResourceType");
-			Element resourceType = (Element) listResourceTypes.item(0);
-			Attr reference = resourceType.getAttributeNode("Reference");
-			
-			if(reference.getNodeValue().equals("Class")) {
-				horarios.add(name.getNodeValue());
-			}*/
 		}
 		
-		for(String horario: horarios) {
+		/*for(String horario: horarios) {
 			System.out.println(horario);
-		}
+		}*/
 		
 		return horarios;
 		
 	}
 	
-	public /*int[][]*/ void recuperarEventos() {
+	public int[][] recuperarEventos(List<String> classes, List<String> professores) {
 		
-		int[][] eventos;
-		int linha, coluna = 0;
-		/*NodeList events = raiz.getElementsByTagName("Event");
+		int numClasses = classes.size();
+		int numProfessores = professores.size();
 		
-		System.out.println(events.getLength());*/
+		int[][] eventos = new int[numProfessores][numClasses];
+		int linha = 0, coluna = 0;
 		
 		NodeList listEvents = raiz.getElementsByTagName("Events");
 		Element events = (Element) listEvents.item(0);
 		
-		System.out.println(events.getChildNodes().getLength());
 		NodeList listEvent = events.getElementsByTagName("Event");
 		
-		System.out.println(listEvent.getLength());
-		
-		// criar a matriz. acho q pode apagar o de baixo VVV
-		
-		/*for(int j = 0; j < events.getLength(); j++) {
-			Element event = (Element) events.item(j);
-			Attr id = event.getAttributeNode("Id");
+		for(int i = 0; i < listEvent.getLength(); i++) {
+			Element event = (Element) listEvent.item(i);
+			NodeList listResource = event.getElementsByTagName("Resource");
 			
-			if(id == null) {
-				break;
+			for(int j = 0; j < listResource.getLength(); j++) {
+				Element resource = (Element) listResource.item(j);
+				Attr reference = resource.getAttributeNode("Reference");				
+				Node role = resource.getElementsByTagName("Role").item(0).getFirstChild();
+				
+				if(role.getNodeValue().equals("Teacher")) {
+					for(String professor: professores) {
+						if(professor.equals(reference.getNodeValue())) {
+							int indice = professores.indexOf(professor);
+							
+							linha = indice;
+							
+							break;
+						}
+					}
+				}
+				else if(role.getNodeValue().equals("Class")) {
+					for(String classe: classes) {
+						if(classe.equals(reference.getNodeValue())) {
+							int indice = classes.indexOf(classe);
+							
+							coluna = indice;
+							
+							break;
+						}
+					}
+				} 
 			}
 			
-			NodeList listNames = event.getElementsByTagName("Name");
-			Node name = listNames.item(0).getFirstChild();
+			NodeList listDuration = event.getElementsByTagName("Duration");
+			Node duration = listDuration.item(0).getFirstChild();
 			
-			horarios.add(name.getNodeValue());
+			eventos[linha][coluna] = Integer.parseInt(duration.getNodeValue());
 		}
 		
-		for(String horario: horarios) {
-			System.out.println(horario);
-		}
+		/*for(int i = 0; i < eventos.length; i++) {
+			for(int j = 0; j < eventos[i].length; j++) {
+				System.out.print(eventos[i][j]);
+			}
+			System.out.println("\n");
+		}*/
 		
-		return horarios;*/
+		return eventos;
 		
 	}
 	
