@@ -1,5 +1,9 @@
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -14,34 +18,70 @@ public class Principal {
 		List<String> professores = parser.recuperarProfessores();
 		List<String> classes = parser.recuperarClasses();
 		List<String> horarios = parser.recuperarHorarios();
-		int[][] eventos = parser.recuperarEventos(classes, professores);
+		int[][] eventos = parser.recuperarEventos(classes, professores);		
+		int[][] horariosIndisponiveis = parser.recuperarHorariosIndisponiveis(professores, horarios);
 		
-		//String[] professores = {"P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "P13", "P14", "P15", "P16"};
-		//String[] turmas = {"T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"};
-		//String[] horarios = {"Mon1", "Mon2", "Mon3", "Mon4", "Mon5", "Tue1", "Tue2", "Tue3", "Tue4", "Tue5", "Wed1", "Wed2", "Wed3", "Wed4", "Wed5", "Wed6"};
-		/*int[][] eventos = {
-				{5, 5, 5, 0, 0, 0, 0, 0},
-				{5, 5, 5, 0, 0, 0, 0, 0},
-				{4, 4, 4, 0, 0, 0, 0, 0},
-				{2, 2, 2, 0, 0, 0, 0, 0},
-				{3, 3, 3, 0, 0, 2, 2, 2},
-				{3, 0, 0, 2, 2, 2, 2, 2},
-				{1, 1, 1, 1, 1, 1, 1, 1},
-				{2, 2, 2, 1, 1, 1, 1, 1},
-				{0, 3, 3, 2, 2, 0, 0, 0},
-				{0, 0, 0, 5, 5, 0, 0, 0},
-				{0, 0, 0, 5, 5, 0, 0, 0},
-				{0, 0, 0, 3, 3, 3, 3, 3},
-				{0, 0, 0, 0, 0, 5, 5, 5},
-				{0, 0, 0, 0, 0, 5, 5, 5},
-				{0, 0, 0, 3, 3, 3, 3, 3},
-				{0, 0, 0, 3, 3, 3, 3, 3}
-		};*/
+		recuperarClassesPrioridade(eventos);
 		
-		GBT gbt = new GBT();
+		GRASP grasp = new GRASP(horariosIndisponiveis);
 		
-		gbt.graspTabuSearch(eventos);
+		grasp.recuperarHorariosCriticos();
+		
+		/*GBT gbt = new GBT();
+		
+		gbt.graspTabuSearch(eventos);*/
 		
 	}
+	
+	// retorna as turmas com a média da carga horária de seus professores
+	public static void recuperarClassesPrioridade(int[][] eventos) {
+		
+		Map<Integer, Double> mediaCargaHorariaTemp = new HashMap<Integer, Double>();
+		int[] cargaHoraria = new int[eventos.length];
+		int[][] eventosTransposta = new int[eventos[0].length][eventos.length];
+		
+		for(int i = 0; i < eventos.length; i++) {
+			for(int j = 0; j < eventos[i].length; j++) {
+				cargaHoraria[i] = cargaHoraria[i] + eventos[i][j]; 
+			}
+		}
+		
+		/*for(int i = 0; i < cargaHoraria.length; i++) {
+			System.out.println(cargaHoraria[i]);
+		}*/
+
+		for (int i = 0; i < eventos.length; i++) {
+			for (int j = 0; j < eventos[0].length ; j++ ) {
+				eventosTransposta[j][i] = eventos[i][j];
+			}
+		}
+
+		for (int i = 0; i < eventosTransposta.length; i++) {
+			int bla = 0;
+			int count = 0;
+			double media = 0.0;
+			
+			for (int j = 0; j < eventosTransposta[i].length ; j++ ) {
+				if(eventosTransposta[i][j] != 0) {
+					bla += cargaHoraria[j];
+					count++;
+				}
+			}
+			media = (double) bla/count;
+			
+			mediaCargaHorariaTemp.put(i, media);			
+		}
+
+	}
+	
+	/*@SuppressWarnings("rawtypes")
+	public static void printMap(Map mp) {
+		Iterator it = mp.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry)it.next();
+			System.out.println(pair.getKey() + " = " + pair.getValue());
+			//it.remove(); // avoids a ConcurrentModificationException
+		}
+	}*/
 
 }

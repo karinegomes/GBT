@@ -147,30 +147,14 @@ public class Parser {
 			
 			for(int j = 0; j < listResource.getLength(); j++) {
 				Element resource = (Element) listResource.item(j);
-				Attr reference = resource.getAttributeNode("Reference");				
+				Attr reference = resource.getAttributeNode("Reference");
 				Node role = resource.getElementsByTagName("Role").item(0).getFirstChild();
 				
 				if(role.getNodeValue().equals("Teacher")) {
-					for(String professor: professores) {
-						if(professor.equals(reference.getNodeValue())) {
-							int indice = professores.indexOf(professor);
-							
-							linha = indice;
-							
-							break;
-						}
-					}
+					linha = recuperarIndice(professores, reference.getNodeValue());
 				}
 				else if(role.getNodeValue().equals("Class")) {
-					for(String classe: classes) {
-						if(classe.equals(reference.getNodeValue())) {
-							int indice = classes.indexOf(classe);
-							
-							coluna = indice;
-							
-							break;
-						}
-					}
+					coluna = recuperarIndice(classes, reference.getNodeValue());
 				} 
 			}
 			
@@ -188,6 +172,63 @@ public class Parser {
 		}*/
 		
 		return eventos;
+		
+	}
+	
+	public int[][] recuperarHorariosIndisponiveis(List<String> professores, List<String> horarios) {
+		
+		int numHorarios = horarios.size();
+		int numProfessores = professores.size();
+		
+		int[][] tabela = new int[numProfessores][numHorarios];
+		int linha = 0, coluna = 0;
+		
+		NodeList listAvoidUnavailableTimesConstraint = raiz.getElementsByTagName("AvoidUnavailableTimesConstraint");
+		
+		for(int i = 0; i < listAvoidUnavailableTimesConstraint.getLength(); i++) {
+			Element restricao = (Element) listAvoidUnavailableTimesConstraint.item(i);
+			
+			NodeList listResource = restricao.getElementsByTagName("Resource");
+			
+			Element resource = (Element) restricao.getElementsByTagName("Resource").item(0);
+			
+			Attr reference = resource.getAttributeNode("Reference");
+			
+			linha = recuperarIndice(professores, reference.getNodeValue()); // indice do professor
+			
+			NodeList listTime = restricao.getElementsByTagName("Time");
+			
+			for(int j = 0; j < listTime.getLength(); j++) {
+				Element time = (Element) listTime.item(j);
+				Attr horario = time.getAttributeNode("Reference");
+				
+				coluna = recuperarIndice(horarios, horario.getNodeValue()); // indice do horario				
+				tabela[linha][coluna] = -1;
+			}
+		}
+		
+		/*for(int i = 0; i < tabela.length; i++) {
+			for(int j = 0; j < tabela[i].length; j++) {
+				System.out.print(tabela[i][j]);
+			}
+			System.out.println("\n");
+		}*/
+		
+		return tabela;
+		
+	}
+	
+	public int recuperarIndice(List<String> lista, String nome) {
+		
+		for(String item: lista) {
+			if(item.equals(nome)) {
+				int indice = lista.indexOf(item);
+				
+				return indice;
+			}
+		}
+		
+		return -1;
 		
 	}
 	

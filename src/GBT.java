@@ -4,6 +4,12 @@ public class GBT {
 	// _f = valor da F.O. da melhor grade de horários
 	// GBTmax = número máximo de iterações
 	// Q0 = grade inicial
+	
+	GRASP grasp;
+	
+	GBT(GRASP grasp) {
+		this.grasp = grasp;
+	}
 
 	public void graspTabuSearch(int[][] eventos) {
 		
