@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -23,9 +24,13 @@ public class Principal {
 		
 		recuperarClassesPrioridade(eventos);
 		
-		GRASP grasp = new GRASP(horariosIndisponiveis);
+		GRASP grasp = new GRASP(horariosIndisponiveis, eventos);
 		
-		grasp.recuperarHorariosCriticos();
+		TreeMap<Integer, Integer> cargaHorariaOrdenada = grasp.recuperarListaProfessoresOrdenada();
+		
+		//System.out.println(cargaHorariaOrdenada.getClass());
+		
+		grasp.criarLRC(cargaHorariaOrdenada, 5);
 		
 		/*GBT gbt = new GBT();
 		
