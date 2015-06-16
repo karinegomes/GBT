@@ -218,6 +218,10 @@ public class Parser {
 		
 	}
 	
+	public void restricaoDistribuirEventosDivididos() {
+		
+	}
+	
 	public int recuperarIndice(List<String> lista, String nome) {
 		
 		for(String item: lista) {

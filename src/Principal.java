@@ -26,11 +26,7 @@ public class Principal {
 		
 		GRASP grasp = new GRASP(horariosIndisponiveis, eventos);
 		
-		TreeMap<Integer, Integer> cargaHorariaOrdenada = grasp.recuperarListaProfessoresOrdenada();
-		
-		//System.out.println(cargaHorariaOrdenada.getClass());
-		
-		grasp.criarLRC(cargaHorariaOrdenada, 5);
+		grasp.construcao(5);
 		
 		/*GBT gbt = new GBT();
 		

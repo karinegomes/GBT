@@ -28,7 +28,7 @@ public class GRASP {
 					}
 					else {
 						horariosCriticos.put(j, horariosCriticos.get(j) + 1);
-					}					
+					}
 				}
 			}
 		}
@@ -64,10 +64,10 @@ public class GRASP {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public Map<Integer, Integer> criarLRC(TreeMap<Integer, Integer> professores, int tamanho) {
+	public TreeMap<Integer, Integer> criarLRC(Map<Integer, Integer> listaProfessores, int tamanho) {
 
-		Map<Integer, Integer> lrc = new TreeMap<Integer, Integer>();		
-		Iterator it = professores.entrySet().iterator();		
+		TreeMap<Integer, Integer> lrc = new TreeMap<Integer, Integer>();		
+		Iterator it = listaProfessores.entrySet().iterator();		
 		int i = 0;
 
 		while(it.hasNext() && i < tamanho) {
@@ -84,23 +84,62 @@ public class GRASP {
 
 	}
 
-	public void escolherProfessor(TreeMap<Integer, Integer> lrc) {
+	public int escolherProfessor(Map<Integer, Integer> lrc) {
 
-		Random       random    = new Random();
-		List<Integer> keys      = new ArrayList<Integer>(lrc.keySet());
-		int       randomKey = keys.get( random.nextInt(keys.size()) );
-		int       value     = lrc.get(randomKey);
+		Random random = new Random();
+		List<Integer> keys = new ArrayList<Integer>(lrc.keySet());
+		int randomKey = keys.get(random.nextInt(keys.size()));
 		
-		System.out.println(value);
-
-
+		return randomKey;
 
 	}
+	
+	public int escolherTurma(List<Integer> turmas) {
+		
+		Random random = new Random();
+		int randomTurma = turmas.get(random.nextInt(turmas.size()));
+		
+		return randomTurma;
+		
+	}
 
-	public void construcao() {
+	public void construcao(int tamanhoLRC) {
 
-		Map<Integer, Integer> horariosCriticos = recuperarHorariosCriticos();		
-
+		Map<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
+		Map<Integer, Integer> listaProfessores = new TreeMap<Integer, Integer>();
+		Map<Integer, Integer> lrc = new TreeMap<Integer, Integer>();
+		List<Integer> turmas = new ArrayList<Integer>();
+		
+		horariosCriticos = recuperarHorariosCriticos();
+		listaProfessores = recuperarListaProfessoresOrdenada();
+		lrc = criarLRC(listaProfessores, tamanhoLRC);
+		int professor = escolherProfessor(lrc);
+		
+		System.out.println(professor);
+		
+		/*for(int i = 0; i < eventos.length; i++) {
+			for(int j = 0; j < eventos[i].length; j++) {
+				System.out.print(eventos[i][j] + " ");
+			}
+			System.out.println("\n");
+		}*/
+		
+		for(int i = 0; i < eventos[professor].length; i++) {
+			if(eventos[professor][i] != 0) {
+				turmas.add(i);
+			}
+		}
+		
+		for(int turma: turmas) {
+			System.out.print(turma + "  ");
+		}
+		
+		System.out.println("");
+		
+		int turma = escolherTurma(turmas);
+		
+		System.out.println(turma);
+		
 	}
 
 	@SuppressWarnings("rawtypes")
