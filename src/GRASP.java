@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -6,23 +7,56 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 public class GRASP {
-
-	int[][] horariosIndisponiveis;
+	
+	List<String> professores;
+	List<String> classes;
+	List<String> horarios;
 	int[][] eventos;
+	int[][] grade;
 
-	GRASP(int[][] horariosIndisponiveis, int[][] eventos) {
-		this.horariosIndisponiveis = horariosIndisponiveis;
-		this.eventos = eventos;
+	public GRASP() throws ParserConfigurationException, SAXException, IOException {
+		Parser parser = new Parser("BrazilInstance3.xml");
+		
+		professores = parser.recuperarProfessores();
+		classes = parser.recuperarClasses();
+		horarios = parser.recuperarHorarios();
+		eventos = parser.recuperarEventos(classes, professores);		
+		grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
 	}
 
 	public TreeMap<Integer, Integer> recuperarHorariosCriticos() {
 
 		Map<Integer, Integer> horariosCriticos = new HashMap<Integer, Integer>();
 
-		for(int i = 0; i < horariosIndisponiveis.length; i++) {
-			for(int j = 0; j < horariosIndisponiveis[i].length; j++) {
-				if(horariosIndisponiveis[i][j] == -1) {
+		/*for(int i = 0; i < grade.length; i++) {
+			for(int j = 0; j < grade[i].length; j++) {
+				if(grade[i][j] == -1) {
+					if(horariosCriticos.get(j) == null) {
+						horariosCriticos.put(j, 1);
+					}
+					else {
+						horariosCriticos.put(j, horariosCriticos.get(j) + 1);
+					}
+				}
+				else if(grade[i][j] > 0) {
+					if(horariosCriticos.get(j) == null) {
+						horariosCriticos.put(j, 0);
+					}
+					else {
+						horariosCriticos.put(j, horariosCriticos.get(j) - 1);
+					}
+				}
+			}
+		}*/
+		
+		for(int i = 0; i < grade.length; i++) {
+			for(int j = 0; j < grade[i].length; j++) {
+				if(grade[i][j] == 0) {
 					if(horariosCriticos.get(j) == null) {
 						horariosCriticos.put(j, 1);
 					}
@@ -35,7 +69,7 @@ public class GRASP {
 
 		//printMap(horariosCriticos);
 
-		TreeMap<Integer, Integer> horariosCriticosOrdenados = sortByValue(horariosCriticos); // horarios criticos ordenados
+		TreeMap<Integer, Integer> horariosCriticosOrdenados = ordenacaoCrescente(horariosCriticos); // horarios criticos ordenados
 
 		//printMap(sortedMap);
 
@@ -58,13 +92,15 @@ public class GRASP {
 			}
 		}
 
-		TreeMap<Integer, Integer> cargaHorariaOrdenada = sortByValue(cargaHoraria);
+		TreeMap<Integer, Integer> cargaHorariaOrdenada = ordenacaoDecrescente(cargaHoraria);
 
 		return cargaHorariaOrdenada;
 	}
 
 	@SuppressWarnings("rawtypes")
-	public TreeMap<Integer, Integer> criarLRC(Map<Integer, Integer> listaProfessores, int tamanho) {
+	public TreeMap<Integer, Integer> criarLRC(Map<Integer, Integer> listaProfessores, double alpha) {
+		
+		int tamanho = (int) (listaProfessores.size() * alpha);
 
 		TreeMap<Integer, Integer> lrc = new TreeMap<Integer, Integer>();		
 		Iterator it = listaProfessores.entrySet().iterator();		
@@ -103,19 +139,28 @@ public class GRASP {
 		
 	}
 
-	public void construcao(int tamanhoLRC) {
+	public void construcao(double tamanhoLRC) {
 
-		Map<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
+		TreeMap<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> listaProfessores = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> lrc = new TreeMap<Integer, Integer>();
 		List<Integer> turmas = new ArrayList<Integer>();
 		
 		horariosCriticos = recuperarHorariosCriticos();
+		
+		System.out.println("Horários críticos:");
+		printMap(horariosCriticos);
+		System.out.println("\n");
+		
 		listaProfessores = recuperarListaProfessoresOrdenada();
 		lrc = criarLRC(listaProfessores, tamanhoLRC);
 		int professor = escolherProfessor(lrc);
 		
-		System.out.println(professor);
+		System.out.println("Lista de professores:");
+		printMap(listaProfessores);
+		System.out.println("\n");
+		
+		System.out.println("Professor escolhido: " + professor);
 		
 		/*for(int i = 0; i < eventos.length; i++) {
 			for(int j = 0; j < eventos[i].length; j++) {
@@ -130,6 +175,7 @@ public class GRASP {
 			}
 		}
 		
+		System.out.println("Turmas:");
 		for(int turma: turmas) {
 			System.out.print(turma + "  ");
 		}
@@ -138,7 +184,34 @@ public class GRASP {
 		
 		int turma = escolherTurma(turmas);
 		
-		System.out.println(turma);
+		System.out.println("Turma escolhida: " + turma);
+		
+		//printMap(horariosCriticos);
+		
+		System.out.println("Horário crítico: " + horariosCriticos.firstKey());
+		
+		Iterator it = horariosCriticos.entrySet().iterator();
+		
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry)it.next();
+			
+			int key = (int) pair.getKey();
+			
+			if(grade[professor][key] == 0) {
+				grade[professor][key] = turma + 1;
+				
+				break;
+			}
+		}
+		
+		for(int i = 0; i < grade.length; i++) {
+			for(int j = 0; j < grade[i].length; j++) {
+				System.out.print(grade[i][j] + " ");
+			}
+			System.out.println("\n");
+		}
+		
+		construcao(tamanhoLRC);
 		
 	}
 
@@ -152,9 +225,20 @@ public class GRASP {
 		}
 	}
 
-	public TreeMap<Integer, Integer> sortByValue(Map<Integer, Integer> unsortedMap) {
+	public TreeMap<Integer, Integer> ordenacaoDecrescente(Map<Integer, Integer> unsortedMap) {
 
 		ValueComparator vc =  new ValueComparator(unsortedMap);
+		TreeMap<Integer, Integer> sortedMap = new TreeMap<Integer, Integer>(vc);
+
+		sortedMap.putAll(unsortedMap);
+
+		return sortedMap;
+
+	}
+	
+	public TreeMap<Integer, Integer> ordenacaoCrescente(Map<Integer, Integer> unsortedMap) {
+
+		ValueComparator2 vc =  new ValueComparator2(unsortedMap);
 		TreeMap<Integer, Integer> sortedMap = new TreeMap<Integer, Integer>(vc);
 
 		sortedMap.putAll(unsortedMap);
