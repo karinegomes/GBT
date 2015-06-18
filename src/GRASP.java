@@ -19,15 +19,21 @@ public class GRASP {
 	int[][] eventos;
 	int[][] grade;
 	int[][] eventosDivididos;
+	int[][] duracaoAulas;
 
-	public GRASP() throws ParserConfigurationException, SAXException, IOException {
+	public GRASP(List<String> professores, List<String> classes, List<String> horarios) throws ParserConfigurationException, SAXException, IOException {
 		Parser parser = new Parser("BrazilInstance3.xml");
 		
-		professores = parser.recuperarProfessores();
+		/*professores = parser.recuperarProfessores();
 		classes = parser.recuperarClasses();
-		horarios = parser.recuperarHorarios();
-		eventos = parser.recuperarEventos(classes, professores);		
+		horarios = parser.recuperarHorarios();*/
+		eventos = parser.recuperarEventos(classes, professores);
+		
+		this.professores = professores;
+		this.classes = classes;
+		this.horarios = horarios;
 		grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
+		duracaoAulas = new int[professores.size()][horarios.size()];
 		
 		eventosDivididos = parser.restricaoDistribuirEventosDivididos(classes, professores);
 	}
@@ -130,8 +136,6 @@ public class GRASP {
 		Random random = new Random();
 		List<Integer> keys = new ArrayList<Integer>(lrc.keySet());
 		
-		System.out.println("keys.size(): " + keys.size());
-		
 		if(keys.size() == 0) {
 			return -1;
 		}
@@ -152,7 +156,7 @@ public class GRASP {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void construcao(double tamanhoLRC) {
+	public int[][] construcao(double tamanhoLRC) {
 
 		TreeMap<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> listaProfessores = new TreeMap<Integer, Integer>();
@@ -161,23 +165,13 @@ public class GRASP {
 		
 		horariosCriticos = recuperarHorariosCriticos();
 		
-		System.out.println("Horários críticos:");
-		printMap(horariosCriticos);
-		System.out.println("\n");
-		
 		listaProfessores = recuperarListaProfessoresOrdenada();
 		lrc = criarLRC(listaProfessores, tamanhoLRC);
 		int professor = escolherProfessor(lrc);
 		
 		if(professor == -1) {
-			return;
+			return grade;
 		}
-		
-		System.out.println("Lista de professores:");
-		printMap(listaProfessores);
-		System.out.println("\n");
-		
-		System.out.println("Professor escolhido: " + professor);
 		
 		/*for(int i = 0; i < eventos.length; i++) {
 			for(int j = 0; j < eventos[i].length; j++) {
@@ -192,20 +186,7 @@ public class GRASP {
 			}
 		}
 		
-		System.out.println("Turmas:");
-		for(int turma: turmas) {
-			System.out.print(turma + "  ");
-		}
-		
-		System.out.println("");
-		
 		int turma = escolherTurma(turmas);
-		
-		System.out.println("Turma escolhida: " + turma);
-		
-		printMap(horariosCriticos);
-		
-		System.out.println("Horário crítico: " + horariosCriticos.firstKey());
 		
 		Iterator it = horariosCriticos.entrySet().iterator();
 		
@@ -241,9 +222,11 @@ public class GRASP {
 					grade[professor][key] = turma + 1;
 					
 					if(eventos[professor][turma] >= 2) {
+						duracaoAulas[professor][key] = 2;
 						eventos[professor][turma] -= 2;
 					}
 					else {
+						duracaoAulas[professor][key] = 1;
 						eventos[professor][turma] = 0;
 					}
 					
@@ -260,31 +243,17 @@ public class GRASP {
 			}
 		}
 		
-		System.out.println("Grade:\n");
+		/*System.out.println("Grade:\n");
 		for(int i = 0; i < grade.length; i++) {
 			for(int j = 0; j < grade[i].length; j++) {
 				System.out.print(grade[i][j] + " ");
 			}
 			System.out.println("\n");
-		}
-		
-		System.out.println("Eventos:\n");
-		for(int i = 0; i < eventos.length; i++) {
-			for(int j = 0; j < eventos[i].length; j++) {
-				System.out.print(eventos[i][j] + " ");
-			}
-			System.out.println("\n");
-		}
-		
-		System.out.println("Eventos divididos:");
-		for(int i = 0; i < eventosDivididos.length; i++) {
-			for(int j = 0; j < eventosDivididos[i].length; j++) {
-				System.out.print(eventosDivididos[i][j] + " ");
-			}
-			System.out.println("\n");
-		}
+		}*/
 		
 		construcao(tamanhoLRC);
+		
+		return grade;
 		
 	}
 
@@ -343,6 +312,12 @@ public class GRASP {
 		}
 		
 		return false;
+		
+	}
+	
+	public int[][] recuperarDuracaoAulas() {
+		
+		return duracaoAulas;
 		
 	}
 
