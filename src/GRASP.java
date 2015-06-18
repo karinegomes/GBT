@@ -18,6 +18,7 @@ public class GRASP {
 	List<String> horarios;
 	int[][] eventos;
 	int[][] grade;
+	int[][] eventosDivididos;
 
 	public GRASP() throws ParserConfigurationException, SAXException, IOException {
 		Parser parser = new Parser("BrazilInstance3.xml");
@@ -27,6 +28,8 @@ public class GRASP {
 		horarios = parser.recuperarHorarios();
 		eventos = parser.recuperarEventos(classes, professores);		
 		grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
+		
+		eventosDivididos = parser.restricaoDistribuirEventosDivididos(classes, professores);
 	}
 
 	public TreeMap<Integer, Integer> recuperarHorariosCriticos() {
@@ -110,8 +113,10 @@ public class GRASP {
 			Map.Entry pair = (Map.Entry) it.next();			
 			int key = (int) pair.getKey();
 			int value = (int) pair.getValue();
-
-			lrc.put(key, value);
+			
+			if(value > 0) {
+				lrc.put(key, value);
+			}
 
 			i++;
 		}
@@ -124,6 +129,13 @@ public class GRASP {
 
 		Random random = new Random();
 		List<Integer> keys = new ArrayList<Integer>(lrc.keySet());
+		
+		System.out.println("keys.size(): " + keys.size());
+		
+		if(keys.size() == 0) {
+			return -1;
+		}
+		
 		int randomKey = keys.get(random.nextInt(keys.size()));
 		
 		return randomKey;
@@ -139,6 +151,7 @@ public class GRASP {
 		
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void construcao(double tamanhoLRC) {
 
 		TreeMap<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
@@ -155,6 +168,10 @@ public class GRASP {
 		listaProfessores = recuperarListaProfessoresOrdenada();
 		lrc = criarLRC(listaProfessores, tamanhoLRC);
 		int professor = escolherProfessor(lrc);
+		
+		if(professor == -1) {
+			return;
+		}
 		
 		System.out.println("Lista de professores:");
 		printMap(listaProfessores);
@@ -186,7 +203,7 @@ public class GRASP {
 		
 		System.out.println("Turma escolhida: " + turma);
 		
-		//printMap(horariosCriticos);
+		printMap(horariosCriticos);
 		
 		System.out.println("Horário crítico: " + horariosCriticos.firstKey());
 		
@@ -198,15 +215,53 @@ public class GRASP {
 			int key = (int) pair.getKey();
 			
 			if(grade[professor][key] == 0) {
-				grade[professor][key] = turma + 1;
+				boolean existe = false;
 				
-				break;
+				for(int i = 0; i < grade.length; i++) {
+					if(grade[i][key] == turma + 1) {
+						existe = true;
+						
+						break;
+					}
+				}
+				
+				if(existe == false) {
+					grade[professor][key] = turma + 1;
+					// tratar restrição de dividir horarios
+					
+					if(eventosDivididos[professor][turma] > 0) {
+						eventosDivididos[professor][turma]--;						
+						eventos[professor][turma] = eventos[professor][turma] - 2;
+					}
+					else {
+						eventos[professor][turma] = 0;
+					}
+					
+					break;
+				}
 			}
 		}
 		
+		System.out.println("Grade:\n");
 		for(int i = 0; i < grade.length; i++) {
 			for(int j = 0; j < grade[i].length; j++) {
 				System.out.print(grade[i][j] + " ");
+			}
+			System.out.println("\n");
+		}
+		
+		System.out.println("Eventos:\n");
+		for(int i = 0; i < eventos.length; i++) {
+			for(int j = 0; j < eventos[i].length; j++) {
+				System.out.print(eventos[i][j] + " ");
+			}
+			System.out.println("\n");
+		}
+		
+		System.out.println("Eventos divididos:");
+		for(int i = 0; i < eventosDivididos.length; i++) {
+			for(int j = 0; j < eventosDivididos[i].length; j++) {
+				System.out.print(eventosDivididos[i][j] + " ");
 			}
 			System.out.println("\n");
 		}

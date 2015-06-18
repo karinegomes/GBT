@@ -218,7 +218,45 @@ public class Parser {
 		
 	}
 	
-	public void restricaoDistribuirEventosDivididos() {
+	public int[][] restricaoDistribuirEventosDivididos(List<String> classes, List<String> professores) {
+		
+		int numClasses = classes.size();
+		int numProfessores = professores.size();
+		
+		int[][] eventosDivididos = new int[numProfessores][numClasses];
+		int linha = 0, coluna = 0;
+		
+		NodeList listDistributeSplitEventsConstraint = raiz.getElementsByTagName("DistributeSplitEventsConstraint");
+		
+		for(int i = 0; i < listDistributeSplitEventsConstraint.getLength(); i++) {
+			Element distributeSplit = (Element) listDistributeSplitEventsConstraint.item(i);
+			NodeList listEventGroup = distributeSplit.getElementsByTagName("EventGroup");			
+			int minimum = Integer.parseInt(distributeSplit.getElementsByTagName("Minimum").item(0).getFirstChild().getNodeValue());
+			
+			for(int j = 0; j < listEventGroup.getLength(); j++) {
+				Element eventGroup = (Element) listEventGroup.item(j);
+				Attr reference = eventGroup.getAttributeNode("Reference");
+				String eventoPartesTemp = reference.getValue().split("_")[1];
+				String professor = eventoPartesTemp.split("-")[0];
+				String turma = eventoPartesTemp.split("-")[1];
+				
+				linha = recuperarIndice(professores, professor);
+				coluna = recuperarIndice(classes, turma);
+				
+				eventosDivididos[linha][coluna] = minimum;
+			}
+		}
+		
+		/*System.out.println("Eventos divididos:\n");
+		for(int i = 0; i < eventosDivididos.length; i++) {
+			for(int j = 0; j < eventosDivididos[i].length; j++) {
+				System.out.print(eventosDivididos[i][j] + " ");
+			};
+			System.out.println("\n");
+		}
+		System.out.println("\n");*/
+		
+		return eventosDivididos;
 		
 	}
 	
