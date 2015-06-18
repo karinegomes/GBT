@@ -187,11 +187,7 @@ public class Parser {
 		
 		for(int i = 0; i < listAvoidUnavailableTimesConstraint.getLength(); i++) {
 			Element restricao = (Element) listAvoidUnavailableTimesConstraint.item(i);
-			
-			NodeList listResource = restricao.getElementsByTagName("Resource");
-			
 			Element resource = (Element) restricao.getElementsByTagName("Resource").item(0);
-			
 			Attr reference = resource.getAttributeNode("Reference");
 			
 			linha = recuperarIndice(professores, reference.getNodeValue()); // indice do professor
