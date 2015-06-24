@@ -22,6 +22,7 @@ public class GRASP {
 	int[][] duracaoAulas;
 
 	public GRASP(List<String> professores, List<String> classes, List<String> horarios) throws ParserConfigurationException, SAXException, IOException {
+		
 		Parser parser = new Parser("BrazilInstance3.xml");
 		
 		/*professores = parser.recuperarProfessores();
@@ -35,7 +36,7 @@ public class GRASP {
 		grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
 		duracaoAulas = new int[professores.size()][horarios.size()];
 		
-		eventosDivididos = parser.restricaoDistribuirEventosDivididos(classes, professores);
+		//eventosDivididos = parser.restricaoDistribuirEventosDivididos(classes, professores);
 	}
 
 	public TreeMap<Integer, Integer> recuperarHorariosCriticos() {

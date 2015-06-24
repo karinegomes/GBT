@@ -214,12 +214,12 @@ public class Parser {
 		
 	}
 	
-	public int[][] restricaoDistribuirEventosDivididos(List<String> classes, List<String> professores) {
+	public int[] restricaoAulasGeminadas(List<String> classes, List<String> professores) {
 		
 		int numClasses = classes.size();
 		int numProfessores = professores.size();
 		
-		int[][] eventosDivididos = new int[numProfessores][numClasses];
+		int[] aulasGeminadas = new int[numProfessores];
 		int linha = 0, coluna = 0;
 		
 		NodeList listDistributeSplitEventsConstraint = raiz.getElementsByTagName("DistributeSplitEventsConstraint");
@@ -234,12 +234,9 @@ public class Parser {
 				Attr reference = eventGroup.getAttributeNode("Reference");
 				String eventoPartesTemp = reference.getValue().split("_")[1];
 				String professor = eventoPartesTemp.split("-")[0];
-				String turma = eventoPartesTemp.split("-")[1];
 				
-				linha = recuperarIndice(professores, professor);
-				coluna = recuperarIndice(classes, turma);
-				
-				eventosDivididos[linha][coluna] = minimum;
+				linha = recuperarIndice(professores, professor);				
+				aulasGeminadas[linha] = minimum;
 			}
 		}
 		
@@ -252,7 +249,34 @@ public class Parser {
 		}
 		System.out.println("\n");*/
 		
-		return eventosDivididos;
+		return aulasGeminadas;
+		
+	}
+	
+	public int[] restricaoNumeroMaximoDias(List<String> professores) {
+		
+		int numProfessores = professores.size();
+		int[] maximoDias = new int[numProfessores];
+		int linha = 0;
+		
+		NodeList listClusterBusyTimesConstraint = raiz.getElementsByTagName("ClusterBusyTimesConstraint");
+		
+		for(int i = 0; i < listClusterBusyTimesConstraint.getLength(); i++) {
+			Element restricao = (Element) listClusterBusyTimesConstraint.item(i);
+			NodeList listResource = restricao.getElementsByTagName("Resource");
+			int maximum = Integer.parseInt(restricao.getElementsByTagName("Maximum").item(0).getFirstChild().getNodeValue());
+			
+			for(int j = 0; j < listResource.getLength(); j++) {
+				Element resource = (Element) listResource.item(j);
+				Attr reference = resource.getAttributeNode("Reference");
+				String professor = reference.getValue();
+				
+				linha = recuperarIndice(professores, professor);
+				maximoDias[linha] = maximum;
+			}
+		}
+		
+		return maximoDias;
 		
 	}
 	

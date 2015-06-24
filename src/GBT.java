@@ -27,7 +27,7 @@ public class GBT {
 		this.buscaTabu = new BuscaTabu(professores, classes, horarios, eventos);
 	}
 
-	public void graspTabuSearch() {
+	public void graspTabuSearch() throws ParserConfigurationException, SAXException, IOException {
 		
 		int[][] _Q = null;
 		int _f = 0;
