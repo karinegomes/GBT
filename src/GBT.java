@@ -29,22 +29,22 @@ public class GBT {
 
 	public void graspTabuSearch() throws ParserConfigurationException, SAXException, IOException {
 		
-		int[][] _Q = null;
-		int _f = 0;
+		int[][] melhorGrade = null;
+		int funcaoObjetivo = 0;
 		int GBTmax = 100;
 		
 		//for(int i = 0; i < GBTmax; i++) {
-			int[][] Q0 = grasp.construcao(0.5);
+			int[][] solucaoInicial = grasp.construcao(0.5);
 			int[][] duracaoAulas = grasp.recuperarDuracaoAulas();
 			
-			for(int j = 0; j < Q0.length; j++) {
-				for(int k = 0; k < Q0[j].length; k++) {
-					System.out.print(Q0[j][k] + " ");
+			for(int j = 0; j < solucaoInicial.length; j++) {
+				for(int k = 0; k < solucaoInicial[j].length; k++) {
+					System.out.print(solucaoInicial[j][k] + " ");
 				}
 				System.out.println("\n");
 			}
 			
-			buscaTabu.buscaLocal(Q0, duracaoAulas);
+			buscaTabu.buscaLocal(solucaoInicial, duracaoAulas);
 			
 			
 			

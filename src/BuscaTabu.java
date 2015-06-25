@@ -12,39 +12,127 @@ public class BuscaTabu {
 	List<String> professores;
 	List<String> classes;
 	List<String> horarios;
-	int[][] grade;
+	int[][] eventos;
+	int[][] melhorGrade;
+	List<int[]> listaTabu = new ArrayList<int[]>();
+	int[][] duracaoAulas;
+	int melhorSolucao;
 	
 	BuscaTabu(List<String> professores, List<String> classes, List<String> horarios, int[][] eventos) {
 		this.professores = professores;
 		this.classes = classes;
 		this.horarios = horarios;
-		this.grade = eventos;
+		this.eventos = eventos;
 	}
 	
-	public void buscaLocal(int[][] Q, int[][] duracaoAulas) throws ParserConfigurationException, SAXException, IOException {
+	public void buscaLocal(int[][] solucaoInicial, int[][] duracaoAulasInicial) throws ParserConfigurationException, SAXException, IOException {
 		
-		int[][] _Q = Q;
+		int[][] melhorGrade = solucaoInicial;
 		int i = 0;
 		int melhorI = 0;
-		int[] t = null;
+		int[] listaTabu = null;
 		int BTmax = 100;
+		int solucao = funcaoAvaliacao(melhorGrade, duracaoAulasInicial);
 		
-		System.out.println(funcaoAvaliacao(_Q, duracaoAulas));
+		imprimirGrade(duracaoAulasInicial);
 		
-		while(i - melhorI < BTmax) {
+		System.out.println("Função objetivo solução inicial: " + funcaoAvaliacao(melhorGrade, duracaoAulasInicial));
+		
+		escolherMelhorVizinho(melhorGrade, duracaoAulasInicial, solucao);
+		
+		imprimirGrade(melhorGrade);
+		
+		System.out.println("Duração aulas inicial:");
+		
+		//imprimirGrade(duracaoAulasInicial);
+		
+		System.out.println("Duracação aulas atual:");
+		
+		imprimirGrade(duracaoAulas);
+		
+		/*while(i - melhorI < BTmax) {
 			i++;
 			
+		}*/
+		
+	}
+	
+	public void escolherMelhorVizinho(int[][] grade, int[][] duracaoAulasInicial, int solucao) throws ParserConfigurationException, SAXException, IOException {
+		
+		int qtdeSolucoesViaveis = 0;
+		int[][] solucaoAtual = grade;
+		int[][] duracaoAulasAtual = duracaoAulasInicial;
+		int melhorSolucaoVizinho = 999;
+		int[] troca = new int[3];
+		
+		for(int i = 0; i < grade.length; i++) {
+			for(int j = 0; j < grade[i].length; j++) {
+				for(int k = 0; k < grade[i].length; k++) {					
+					if(j != k && grade[i][j] != -1 && grade[i][k] != -1 && grade[i][j] != grade[i][k]) {						
+						int[][] grade2 = new int[grade.length][grade[0].length];
+						int[][] duracaoAulas2 = new int[duracaoAulasInicial.length][duracaoAulasInicial[0].length];
+						
+						for(int a = 0; a < grade.length; a++) {
+							for(int b = 0; b < grade[a].length; b++) {
+								grade2[a][b] = grade[a][b];
+								duracaoAulas2[a][b] = duracaoAulasInicial[a][b];
+							}
+						}
+						
+						int temp = grade2[i][j];
+						grade2[i][j] = grade2[i][k];
+						grade2[i][k] = temp;
+						
+						int temp2 = duracaoAulas2[i][j];
+						duracaoAulas2[i][j] = duracaoAulas2[i][k];
+						duracaoAulas2[i][k] = temp2;
+						
+						int nivelInviabilidade = funcaoRestricoesEssenciais(grade2, duracaoAulas2);			
+						
+						if(nivelInviabilidade == 0) {
+							qtdeSolucoesViaveis++;
+							
+							int funcaoObjetivo = funcaoRestricoesNaoEssenciais(grade2, duracaoAulas2);
+							
+							if(funcaoObjetivo < melhorSolucaoVizinho) {
+								melhorSolucaoVizinho = funcaoObjetivo;
+								troca[0] = i;
+								troca[1] = j;
+								troca[2] = k;
+							}
+							
+							//System.out.println("Função objetivo: " + funcaoObjetivo);
+						}
+					}
+				}
+			}
 		}
+		
+		System.out.println("Troca:");
+		System.out.println(troca[0] + " " + troca[1] + " " + troca[2]);
+		
+		int temp = solucaoAtual[troca[0]][troca[1]];
+		solucaoAtual[troca[0]][troca[1]] = solucaoAtual[troca[0]][troca[2]];
+		solucaoAtual[troca[0]][troca[2]] = temp;
+		
+		int temp2 = duracaoAulasAtual[troca[0]][troca[1]];
+		duracaoAulasAtual[troca[0]][troca[1]] = duracaoAulasAtual[troca[0]][troca[2]];
+		duracaoAulasAtual[troca[0]][troca[2]] = temp2;
+		
+		melhorGrade = solucaoAtual;
+		duracaoAulas = duracaoAulasAtual;
+		melhorSolucao = melhorSolucaoVizinho;
+		
+		listaTabu.add(troca);
 		
 	}
 	
 	public int funcaoAvaliacao(int[][] Q, int[][] duracaoAulas) throws ParserConfigurationException, SAXException, IOException {
 		
 		int nivelInviabilidade = funcaoRestricoesEssenciais(Q, duracaoAulas);
+		int qualidade = funcaoRestricoesNaoEssenciais(Q, duracaoAulas);
 		
-		funcaoRestricoesNaoEssenciais(Q, duracaoAulas);
-		
-		return nivelInviabilidade; // temp
+		return nivelInviabilidade + qualidade;
 		
 	}
 	
@@ -61,7 +149,7 @@ public class BuscaTabu {
 		
 	}
 	
-	public void funcaoRestricoesNaoEssenciais(int[][] grade, int[][] duracaoAulas) throws ParserConfigurationException, SAXException, IOException {
+	public int funcaoRestricoesNaoEssenciais(int[][] grade, int[][] duracaoAulas) throws ParserConfigurationException, SAXException, IOException {
 		
 		Parser parser = new Parser("BrazilInstance3.xml");
 		
@@ -71,6 +159,10 @@ public class BuscaTabu {
 		int restricao1 = validarRestricaoAulasGeminadas(aulasGeminadas, grade, duracaoAulas);		
 		int restricao2 = 3 * validarRestricaoSemPeriodosOciosos(grade);
 		int restricao3 = 9 * validarRestricaoNumMaxDias(grade, maximoDias);
+		
+		int soma = restricao1 + restricao2 + restricao3;
+		
+		return soma;
 		
 	}
 	
@@ -84,14 +176,14 @@ public class BuscaTabu {
 		for(int i = 0; i < Q.length; i++) {
 			List<Integer> turmas = new ArrayList<Integer>();
 			
-			for(int j = 0; j < grade[i].length; j++) {
-				if(grade[i][j] != 0) {
+			for(int j = 0; j < eventos[i].length; j++) {
+				if(eventos[i][j] != 0) {
 					turmas.add(j);
 				}
 			}
 			
 			for(int turma: turmas) {
-				int cargaHoraria = grade[i][turma];
+				int cargaHoraria = eventos[i][turma];
 				int cargaHorariaTemp = 0;
 				int qtdeDuracao2h = (int) cargaHoraria/2;
 				int qtdeDuracao2hTemp = 0;
@@ -200,36 +292,43 @@ public class BuscaTabu {
 		
 		for(int i = 0; i < grade.length; i++) {
 			for(int j = 0; j < grade[i].length; j++) {
-				if(grade[i][j] != 0 && grade[i][j] != -1) {
-					String dia1 = horarios.get(j).split("_")[0];
-					String dia2 = horarios.get(j + 1).split("_")[0];
-					String dia3 = horarios.get(j + 2).split("_")[0];
+				if(grade[i][j] != 0 && grade[i][j] != -1) {					
 					int qtdePeriodos = grade[i].length - 1;
 					
-					if(j != qtdePeriodos && j + 1 != qtdePeriodos && grade[i][j + 1] != 0 && grade[i][j + 1] != -1 && dia1.equals(dia2)) {
-						aulasGeminadasTemp[i]++;
+					if(j != qtdePeriodos && j + 1 != qtdePeriodos) {
+						String dia1 = horarios.get(j).split("_")[0];
+						String dia2 = horarios.get(j + 1).split("_")[0];
 						
-						//System.out.println("Encontradas aulas geminadas no professor T" + i + ": " + j + " " + (j + 1));
-						
-						if(duracaoAulas[i][j] < 2 || duracaoAulas[i][j + 1] < 2) {
-							violacao++;
+						if(grade[i][j + 1] != 0 && grade[i][j + 1] != -1 && dia1.equals(dia2)) {
+							aulasGeminadasTemp[i]++;
 							
-							//System.out.println("Aulas com 1h de duração.");
-						}
-						
-						// Verifica se existem 3 aulas seguidas de um professor
-						if(j + 2 != qtdePeriodos && grade[i][j + 2] != 0 && grade[i][j + 2] != -1 && dia1.equals(dia3)) {
-							//System.out.println("violação 3 aulas encontrada na linha: " + i);
+							//System.out.println("Encontradas aulas geminadas no professor T" + i + ": " + j + " " + (j + 1));
 							
-							violacao++;
-							j++;
-						}
-						
-						if(aulasGeminadas[i] < aulasGeminadasTemp[i]) {
-							//System.out.println("violação encontrada na linha: " + i);
-							violacao++;
+							if(duracaoAulas[i][j] < 2 || duracaoAulas[i][j + 1] < 2) {
+								violacao++;
+								
+								//System.out.println("Aulas com 1h de duração.");
+							}
 							
-							break;
+							// Verifica se existem 3 aulas seguidas de um professor
+							if(j + 2 != qtdePeriodos) {
+								String dia3 = horarios.get(j + 2).split("_")[0];
+								
+								if(grade[i][j + 2] != 0 && grade[i][j + 2] != -1 && dia1.equals(dia3)) {
+									//System.out.println("violação 3 aulas encontrada na linha: " + i);
+									
+									violacao++;
+									j++;
+								}
+							}
+							
+							if(aulasGeminadas[i] < aulasGeminadasTemp[i]) {
+								//System.out.println("violação encontrada na linha: " + i);
+								violacao++;
+								
+								break;
+							}
+							
 						}
 					}
 				}
@@ -349,6 +448,17 @@ public class BuscaTabu {
 		}
 		
 		return periodosSemana;
+		
+	}
+	
+	public void imprimirGrade(int[][] grade) {
+		
+		for(int i = 0; i < grade.length; i++) {
+			for(int j = 0; j < grade[i].length; j++) {
+				System.out.print(grade[i][j] + " ");
+			}
+			System.out.println("\n");
+		}
 		
 	}
 
