@@ -14,68 +14,81 @@ public class BuscaTabu {
 	List<String> horarios;
 	int[][] eventos;
 	int[][] melhorGrade;
+	int[][] melhorGradeVizinho;
 	List<int[]> listaTabu = new ArrayList<int[]>();
 	int[][] duracaoAulas;
+	int[][] duracaoAulasMelhorVizinho;
 	int melhorSolucao;
+	int melhorSolucaoVizinho;
 	
 	BuscaTabu(List<String> professores, List<String> classes, List<String> horarios, int[][] eventos) {
 		this.professores = professores;
 		this.classes = classes;
 		this.horarios = horarios;
 		this.eventos = eventos;
+		this.melhorSolucaoVizinho = 999;
 	}
 	
 	public void buscaLocal(int[][] solucaoInicial, int[][] duracaoAulasInicial) throws ParserConfigurationException, SAXException, IOException {
 		
-		int[][] melhorGrade = solucaoInicial;
 		int i = 0;
 		int melhorI = 0;
-		int[] listaTabu = null;
-		int BTmax = 100;
-		int solucao = funcaoAvaliacao(melhorGrade, duracaoAulasInicial);
+		int BTmax = 10;
 		
-		imprimirGrade(duracaoAulasInicial);
-		
-		System.out.println("Função objetivo solução inicial: " + funcaoAvaliacao(melhorGrade, duracaoAulasInicial));
-		
-		escolherMelhorVizinho(melhorGrade, duracaoAulasInicial, solucao);
-		
-		imprimirGrade(melhorGrade);
-		
-		System.out.println("Duração aulas inicial:");
+		melhorGrade = solucaoInicial;
+		duracaoAulas = duracaoAulasInicial;
+		melhorSolucao = funcaoAvaliacao(melhorGrade, duracaoAulasInicial);
 		
 		//imprimirGrade(duracaoAulasInicial);
 		
-		System.out.println("Duracação aulas atual:");
+		System.out.println("Função objetivo solução inicial: " + funcaoAvaliacao(melhorGrade, duracaoAulasInicial));
 		
-		imprimirGrade(duracaoAulas);
+		//escolherMelhorVizinho();
 		
-		/*while(i - melhorI < BTmax) {
+		//imprimirGrade(duracaoAulas);
+		
+		while(i - melhorI < BTmax) {
 			i++;
 			
-		}*/
+			escolherMelhorVizinho();
+			
+			System.out.println("Melhor solução vizinho: " + melhorSolucaoVizinho);
+			System.out.println("Melhor solução: " + melhorSolucao);
+			System.out.println("Iteração: " + i);
+			
+			if(melhorSolucaoVizinho < melhorSolucao) {
+				melhorGrade = melhorGradeVizinho;
+				duracaoAulas = duracaoAulasMelhorVizinho;
+				melhorSolucao = melhorSolucaoVizinho;
+				melhorI = i;
+				
+				System.out.println("Melhor iteração: " + melhorI);
+			}
+		}
+		
+		imprimirGrade(melhorGrade);
 		
 	}
 	
-	public void escolherMelhorVizinho(int[][] grade, int[][] duracaoAulasInicial, int solucao) throws ParserConfigurationException, SAXException, IOException {
+	public void escolherMelhorVizinho() throws ParserConfigurationException, SAXException, IOException {
 		
 		int qtdeSolucoesViaveis = 0;
-		int[][] solucaoAtual = grade;
-		int[][] duracaoAulasAtual = duracaoAulasInicial;
-		int melhorSolucaoVizinho = 999;
+		int[][] solucaoAtual = melhorGrade;
+		int[][] duracaoAulasAtual = duracaoAulas;
+		//int melhorSolucaoVizinho = 999;
 		int[] troca = new int[3];
 		
-		for(int i = 0; i < grade.length; i++) {
-			for(int j = 0; j < grade[i].length; j++) {
-				for(int k = 0; k < grade[i].length; k++) {					
-					if(j != k && grade[i][j] != -1 && grade[i][k] != -1 && grade[i][j] != grade[i][k]) {						
-						int[][] grade2 = new int[grade.length][grade[0].length];
-						int[][] duracaoAulas2 = new int[duracaoAulasInicial.length][duracaoAulasInicial[0].length];
+		for(int i = 0; i < melhorGrade.length; i++) {
+			for(int j = 0; j < melhorGrade[i].length; j++) {
+				for(int k = 0; k < melhorGrade[i].length; k++) {					
+					if(j != k && melhorGrade[i][j] != -1 && melhorGrade[i][k] != -1 && melhorGrade[i][j] != melhorGrade[i][k]) {						
+						int[][] grade2 = new int[melhorGrade.length][melhorGrade[0].length];
+						int[][] duracaoAulas2 = new int[duracaoAulas.length][duracaoAulas[0].length];
 						
-						for(int a = 0; a < grade.length; a++) {
-							for(int b = 0; b < grade[a].length; b++) {
-								grade2[a][b] = grade[a][b];
-								duracaoAulas2[a][b] = duracaoAulasInicial[a][b];
+						for(int a = 0; a < melhorGrade.length; a++) {
+							for(int b = 0; b < melhorGrade[a].length; b++) {
+								grade2[a][b] = melhorGrade[a][b];
+								duracaoAulas2[a][b] = duracaoAulas[a][b];
 							}
 						}
 						
@@ -94,7 +107,7 @@ public class BuscaTabu {
 							
 							int funcaoObjetivo = funcaoRestricoesNaoEssenciais(grade2, duracaoAulas2);
 							
-							if(funcaoObjetivo < melhorSolucaoVizinho) {
+							if(funcaoObjetivo < melhorSolucaoVizinho && (!verificarTrocaListaTabu(troca) || funcaoObjetivo < melhorSolucao)) {
 								melhorSolucaoVizinho = funcaoObjetivo;
 								troca[0] = i;
 								troca[1] = j;
@@ -119,9 +132,14 @@ public class BuscaTabu {
 		duracaoAulasAtual[troca[0]][troca[1]] = duracaoAulasAtual[troca[0]][troca[2]];
 		duracaoAulasAtual[troca[0]][troca[2]] = temp2;
 		
-		melhorGrade = solucaoAtual;
-		duracaoAulas = duracaoAulasAtual;
-		melhorSolucao = melhorSolucaoVizinho;
+		melhorGradeVizinho = solucaoAtual;
+		duracaoAulasMelhorVizinho = duracaoAulasAtual;
+		
+		System.out.println("Nova melhor solução: " + melhorSolucaoVizinho);
+		
+		if(listaTabu.size() > 30) {
+			listaTabu.remove(0);
+		}
 		
 		listaTabu.add(troca);
 		
@@ -163,6 +181,23 @@ public class BuscaTabu {
 		int soma = restricao1 + restricao2 + restricao3;
 		
 		return soma;
+		
+	}
+	
+	public boolean verificarTrocaListaTabu(int[] troca) {
+		
+		if(listaTabu.isEmpty())
+			return false;
+		
+		for(int[] trocaTabu: listaTabu) {
+			for(int i = 0; i < trocaTabu.length; i++) {
+				if(trocaTabu[i] != troca[i]) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 		
 	}
 	
