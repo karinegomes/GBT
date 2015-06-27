@@ -39,32 +39,26 @@ public class BuscaTabu {
 		duracaoAulas = duracaoAulasInicial;
 		melhorSolucao = funcaoAvaliacao(melhorGrade, duracaoAulasInicial);
 		
-		//imprimirGrade(duracaoAulasInicial);
-		
 		System.out.println("Função objetivo solução inicial: " + funcaoAvaliacao(melhorGrade, duracaoAulasInicial));
-		
-		//escolherMelhorVizinho();
-		
-		//imprimirGrade(duracaoAulas);
 		
 		while(i - melhorI < BTmax) {
 			i++;
 			
 			escolherMelhorVizinho();
 			
-			System.out.println("Melhor solução vizinho: " + melhorSolucaoVizinho);
-			System.out.println("Melhor solução: " + melhorSolucao);
-			System.out.println("Iteração: " + i);
-			
 			if(melhorSolucaoVizinho < melhorSolucao) {
 				melhorGrade = melhorGradeVizinho;
 				duracaoAulas = duracaoAulasMelhorVizinho;
 				melhorSolucao = melhorSolucaoVizinho;
-				melhorI = i;
-				
-				System.out.println("Melhor iteração: " + melhorI);
+				melhorI = i;				
 			}
 		}
+		
+		System.out.println("---------------------------------------------");
+		
+		System.out.println("Melhor iteração: " + melhorI);
+		
+		listaTabu.clear();
 		
 		imprimirGrade(melhorGrade);
 		
@@ -137,7 +131,7 @@ public class BuscaTabu {
 		
 		System.out.println("Nova melhor solução: " + melhorSolucaoVizinho);
 		
-		if(listaTabu.size() > 30) {
+		if(listaTabu.size() > 17) {
 			listaTabu.remove(0);
 		}
 		
@@ -267,9 +261,10 @@ public class BuscaTabu {
 	public int validarRestricao1EventoPorDia(int[][] grade) {
 		
 		int violacao = 0;
-		List<Integer> turmasVerificadas = new ArrayList<Integer>();
+		int[][] periodosSemana = recuperarPeriodosSemana();
+		boolean _break = false;
 		
-		for(int i = 0; i < grade.length; i++) {
+		/*for(int i = 0; i < grade.length; i++) {
 			for(int j = 0; j < grade[i].length; j++) {
 				if(grade[i][j] != 0 && grade[i][j] != -1 && !turmasVerificadas.contains(grade[i][j])) {
 					int turma = grade[i][j];
@@ -291,6 +286,39 @@ public class BuscaTabu {
 					
 					turmasVerificadas.add(turma);
 				}
+			}
+		}*/
+		
+		for(int i = 0; i < grade.length; i++) {
+			_break = false;
+			
+			for(int j = 0; j < periodosSemana.length; j++) {
+				
+				
+				for(int k = periodosSemana[j][0]; k <= periodosSemana[j][1]; k++) {
+					if(grade[i][k] == -1) break;
+					
+					if(_break) {
+						_break = false;
+						
+						break;
+					}
+					
+					if(grade[i][k] > 0) {
+						for(int l = k + 1; l <= periodosSemana[j][1]; l++) {
+							if(grade[i][k] == grade[i][l]) {
+								violacao++;
+								
+								_break = true;
+								
+								break;
+							}
+						}
+					}
+					
+					
+				}
+				
 			}
 		}
 		
