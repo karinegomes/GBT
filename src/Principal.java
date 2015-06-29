@@ -12,9 +12,17 @@ public class Principal {
 		
 		grasp.construcao(0.5);*/
 		
+		long startTime = System.currentTimeMillis();
+		
 		GBT gbt = new GBT();
 		
 		gbt.graspTabuSearch();
+		
+		long endTime   = System.currentTimeMillis();
+		
+		long totalTime = endTime - startTime;
+		
+		System.out.println("Duração: " + totalTime);
 		
 	}
 

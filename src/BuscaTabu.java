@@ -21,12 +21,20 @@ public class BuscaTabu {
 	int melhorSolucao;
 	int melhorSolucaoVizinho;
 	
-	BuscaTabu(List<String> professores, List<String> classes, List<String> horarios, int[][] eventos) {
+	int[] aulasGeminadas;
+	int[] maximoDias;
+	
+	BuscaTabu(List<String> professores, List<String> classes, List<String> horarios, int[][] eventos) throws ParserConfigurationException, SAXException, IOException {
+		
+		Parser parser = new Parser("BrazilInstance3.xml");
+		
 		this.professores = professores;
 		this.classes = classes;
 		this.horarios = horarios;
 		this.eventos = eventos;
 		this.melhorSolucaoVizinho = 999;
+		this.aulasGeminadas = parser.restricaoAulasGeminadas(classes, professores);
+		this.maximoDias = parser.restricaoNumeroMaximoDias(professores);
 	}
 	
 	public void buscaLocal(int[][] solucaoInicial, int[][] duracaoAulasInicial) throws ParserConfigurationException, SAXException, IOException {
@@ -38,8 +46,6 @@ public class BuscaTabu {
 		melhorGrade = solucaoInicial;
 		duracaoAulas = duracaoAulasInicial;
 		melhorSolucao = funcaoAvaliacao(melhorGrade, duracaoAulasInicial);
-		
-		System.out.println("Função objetivo solução inicial: " + funcaoAvaliacao(melhorGrade, duracaoAulasInicial));
 		
 		while(i - melhorI < BTmax) {
 			i++;
@@ -54,22 +60,20 @@ public class BuscaTabu {
 			}
 		}
 		
-		System.out.println("---------------------------------------------");
+		//System.out.println("---------------------------------------------");
 		
-		System.out.println("Melhor iteração: " + melhorI);
+		//System.out.println("Melhor iteração: " + melhorI);
 		
 		listaTabu.clear();
 		
-		imprimirGrade(melhorGrade);
+		//imprimirGrade(melhorGrade);
 		
 	}
 	
 	public void escolherMelhorVizinho() throws ParserConfigurationException, SAXException, IOException {
 		
-		int qtdeSolucoesViaveis = 0;
 		int[][] solucaoAtual = melhorGrade;
 		int[][] duracaoAulasAtual = duracaoAulas;
-		//int melhorSolucaoVizinho = 999;
 		int[] troca = new int[3];
 		
 		for(int i = 0; i < melhorGrade.length; i++) {
@@ -97,7 +101,6 @@ public class BuscaTabu {
 						int nivelInviabilidade = funcaoRestricoesEssenciais(grade2, duracaoAulas2);			
 						
 						if(nivelInviabilidade == 0) {
-							qtdeSolucoesViaveis++;
 							
 							int funcaoObjetivo = funcaoRestricoesNaoEssenciais(grade2, duracaoAulas2);
 							
@@ -115,8 +118,8 @@ public class BuscaTabu {
 			}
 		}
 		
-		System.out.println("Troca:");
-		System.out.println(troca[0] + " " + troca[1] + " " + troca[2]);
+		//System.out.println("Troca:");
+		//System.out.println(troca[0] + " " + troca[1] + " " + troca[2]);
 		
 		int temp = solucaoAtual[troca[0]][troca[1]];
 		solucaoAtual[troca[0]][troca[1]] = solucaoAtual[troca[0]][troca[2]];
@@ -129,7 +132,7 @@ public class BuscaTabu {
 		melhorGradeVizinho = solucaoAtual;
 		duracaoAulasMelhorVizinho = duracaoAulasAtual;
 		
-		System.out.println("Nova melhor solução: " + melhorSolucaoVizinho);
+		//System.out.println("Nova melhor solução: " + melhorSolucaoVizinho);
 		
 		if(listaTabu.size() > 17) {
 			listaTabu.remove(0);
@@ -150,25 +153,31 @@ public class BuscaTabu {
 	
 	public int funcaoRestricoesEssenciais(int[][] grade, int[][] duracaoAulas) {
 		
-		int violacao1 = validarRestricaoAtribuirHorariosEDuracao2h(grade, duracaoAulas);
-		int violacao2 = validarRestricaoDividirEventos(duracaoAulas);
+		//int violacao1 = validarRestricaoAtribuirHorariosEDuracao2h(grade, duracaoAulas);
+		//int violacao2 = validarRestricaoDividirEventos(duracaoAulas);
 		int violacao3 = validarRestricao1EventoPorDia(grade);
+		
+		if(violacao3 > 0) {
+			return violacao3;
+		}
+		
 		int violacao4 = validarRestricaoChoqueHorario(grade);
 		
-		int soma = violacao1 + violacao2 + violacao3 + violacao4;
+		if(violacao4 > 0) {
+			return violacao4;
+		}
 		
-		return soma;
+		return 0;
+		
+		//int soma = violacao1 + violacao2 + violacao3 + violacao4;
+		
+		//return soma;
 		
 	}
 	
 	public int funcaoRestricoesNaoEssenciais(int[][] grade, int[][] duracaoAulas) throws ParserConfigurationException, SAXException, IOException {
 		
-		Parser parser = new Parser("BrazilInstance3.xml");
-		
-		int[] aulasGeminadas = parser.restricaoAulasGeminadas(classes, professores);
-		int[] maximoDias = parser.restricaoNumeroMaximoDias(professores);
-		
-		int restricao1 = validarRestricaoAulasGeminadas(aulasGeminadas, grade, duracaoAulas);		
+		int restricao1 = validarRestricaoAulasGeminadas(aulasGeminadas, grade, duracaoAulas);
 		int restricao2 = 3 * validarRestricaoSemPeriodosOciosos(grade);
 		int restricao3 = 9 * validarRestricaoNumMaxDias(grade, maximoDias);
 		
@@ -264,37 +273,10 @@ public class BuscaTabu {
 		int[][] periodosSemana = recuperarPeriodosSemana();
 		boolean _break = false;
 		
-		/*for(int i = 0; i < grade.length; i++) {
-			for(int j = 0; j < grade[i].length; j++) {
-				if(grade[i][j] != 0 && grade[i][j] != -1 && !turmasVerificadas.contains(grade[i][j])) {
-					int turma = grade[i][j];
-					String dia = horarios.get(j).split("_")[0];
-					
-					for(String horario: horarios) {
-						if(horario.contains(dia)) {
-							int idPeriodo = horarios.indexOf(horario);
-							
-							if(idPeriodo != j && grade[i][idPeriodo] != 0 && grade[i][idPeriodo] != -1 && turma == grade[i][idPeriodo]) {
-								violacao++;
-							}
-							
-							if(horario.split("_")[1].equals("5")) {
-								break;
-							}
-						}
-					}
-					
-					turmasVerificadas.add(turma);
-				}
-			}
-		}*/
-		
 		for(int i = 0; i < grade.length; i++) {
 			_break = false;
 			
-			for(int j = 0; j < periodosSemana.length; j++) {
-				
-				
+			for(int j = 0; j < periodosSemana.length; j++) {				
 				for(int k = periodosSemana[j][0]; k <= periodosSemana[j][1]; k++) {
 					if(grade[i][k] == -1) break;
 					
@@ -311,7 +293,9 @@ public class BuscaTabu {
 								
 								_break = true;
 								
-								break;
+								return violacao;
+								
+								//break;
 							}
 						}
 					}
@@ -336,6 +320,8 @@ public class BuscaTabu {
 					for(int k = 0; k < grade.length; k++) {
 						if(k != i && grade[i][j] == grade[k][j]) {
 							violacao++;
+							
+							return violacao;
 						}
 					}
 				}

@@ -42,27 +42,6 @@ public class GRASP {
 	public TreeMap<Integer, Integer> recuperarHorariosCriticos() {
 
 		Map<Integer, Integer> horariosCriticos = new HashMap<Integer, Integer>();
-
-		/*for(int i = 0; i < grade.length; i++) {
-			for(int j = 0; j < grade[i].length; j++) {
-				if(grade[i][j] == -1) {
-					if(horariosCriticos.get(j) == null) {
-						horariosCriticos.put(j, 1);
-					}
-					else {
-						horariosCriticos.put(j, horariosCriticos.get(j) + 1);
-					}
-				}
-				else if(grade[i][j] > 0) {
-					if(horariosCriticos.get(j) == null) {
-						horariosCriticos.put(j, 0);
-					}
-					else {
-						horariosCriticos.put(j, horariosCriticos.get(j) - 1);
-					}
-				}
-			}
-		}*/
 		
 		for(int i = 0; i < grade.length; i++) {
 			for(int j = 0; j < grade[i].length; j++) {
@@ -191,26 +170,6 @@ public class GRASP {
 		
 		Iterator it = horariosCriticos.entrySet().iterator();
 		
-		/*for(int i = 0; i < grade[professor].length; i++) {
-			if(grade[professor][i] == 0) {
-				boolean existe = validarRestricoes(i, turma, professor);
-				
-				if(existe == false) {
-					grade[professor][i] = turma + 1;
-					
-					if(eventosDivididos[professor][turma] > 0) {
-						eventosDivididos[professor][turma]--;						
-						eventos[professor][turma] = eventos[professor][turma] - 2;
-					}
-					else {
-						eventos[professor][turma] = 0;
-					}
-					
-					break;
-				}
-			}
-		}*/
-		
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry)it.next();
 			
@@ -230,14 +189,6 @@ public class GRASP {
 						duracaoAulas[professor][key] = 1;
 						eventos[professor][turma] = 0;
 					}
-					
-					/*if(eventosDivididos[professor][turma] > 0) {
-						eventosDivididos[professor][turma]--;						
-						eventos[professor][turma] = eventos[professor][turma] - 2;
-					}
-					else {
-						eventos[professor][turma] = 0;
-					}*/
 					
 					break;
 				}
