@@ -1,5 +1,7 @@
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -40,13 +42,13 @@ public class GBT {
 		int[][] melhorGrade = null;
 		int[][] duracaoAulas = null;
 		int funcaoObjetivo = 999;
-		int GBTmax = 75;
+		int GBTmax = 50;
 		
 		for(int i = 0; i < GBTmax; i++) {		
 			grasp = new GRASP(professores, classes, horarios);
 			buscaTabu = new BuscaTabu(professores, classes, horarios, eventos);
 			
-			int[][] solucaoInicial = grasp.construcao(0.5);			
+			int[][] solucaoInicial = grasp.construcao(0.5);
 			int[][] duracaoAulasInicial = grasp.recuperarDuracaoAulas();
 			
 			buscaTabu.buscaLocal(solucaoInicial, duracaoAulasInicial);
@@ -65,6 +67,10 @@ public class GBT {
 		System.out.println("-----------------------------------------");
 		
 		System.out.println(funcaoObjetivo);
+		
+		System.out.println("----------------------------------------");
+		
+		imprimirGrade(melhorGrade);
 		
 	}
 	
@@ -88,5 +94,21 @@ public class GBT {
 		}
 		
 	}
+	
+	/*public List<Integer> criarListaHorariosRandom() {
+		
+		List<Integer> horariosRandom = new ArrayList<Integer>();
+		Random random = new Random();
+		
+		while(horariosRandom.size() < 25) {
+			int randomKey = random.nextInt(horarios.size());
+			
+			if(!horariosRandom.contains(randomKey)) {
+				horariosRandom.add(randomKey);
+			}
+		}
+		
+		return horariosRandom;
+	}*/
 	
 }

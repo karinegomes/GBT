@@ -56,9 +56,13 @@ public class GRASP {
 			}
 		}
 
-		//printMap(horariosCriticos);
+		/*System.out.println("------------------------------------");
+		printMap(horariosCriticos);*/
 
 		TreeMap<Integer, Integer> horariosCriticosOrdenados = ordenacaoCrescente(horariosCriticos); // horarios criticos ordenados
+		
+		/*System.out.println("--------------------------------");
+		printMap(horariosCriticosOrdenados);*/
 
 		//printMap(sortedMap);
 
@@ -138,27 +142,20 @@ public class GRASP {
 	@SuppressWarnings("rawtypes")
 	public int[][] construcao(double tamanhoLRC) {
 
-		TreeMap<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
+		Map<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> listaProfessores = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> lrc = new TreeMap<Integer, Integer>();
 		List<Integer> turmas = new ArrayList<Integer>();
 		
-		horariosCriticos = recuperarHorariosCriticos();
-		
+		horariosCriticos = recuperarHorariosCriticos();		
 		listaProfessores = recuperarListaProfessoresOrdenada();
 		lrc = criarLRC(listaProfessores, tamanhoLRC);
-		int professor = escolherProfessor(lrc);
+		
+		int professor = escolherProfessor(lrc);		
 		
 		if(professor == -1) {
 			return grade;
 		}
-		
-		/*for(int i = 0; i < eventos.length; i++) {
-			for(int j = 0; j < eventos[i].length; j++) {
-				System.out.print(eventos[i][j] + " ");
-			}
-			System.out.println("\n");
-		}*/
 		
 		for(int i = 0; i < eventos[professor].length; i++) {
 			if(eventos[professor][i] != 0) {
@@ -169,6 +166,9 @@ public class GRASP {
 		int turma = escolherTurma(turmas);
 		
 		Iterator it = horariosCriticos.entrySet().iterator();
+		boolean preencheu = false;
+		
+		//List<Integer> horariosRandom = criarListaHorariosRandom();
 		
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry)it.next();
@@ -180,6 +180,7 @@ public class GRASP {
 				
 				if(existe == false) {
 					grade[professor][key] = turma + 1;
+					preencheu = true;
 					
 					if(eventos[professor][turma] >= 2) {
 						duracaoAulas[professor][key] = 2;
@@ -195,13 +196,56 @@ public class GRASP {
 			}
 		}
 		
-		/*System.out.println("Grade:\n");
-		for(int i = 0; i < grade.length; i++) {
-			for(int j = 0; j < grade[i].length; j++) {
-				System.out.print(grade[i][j] + " ");
+		if(preencheu == false) {			
+			while (it.hasNext()) {
+				Map.Entry pair = (Map.Entry)it.next();
+				
+				int key = (int) pair.getKey();
+				
+				if(grade[professor][key] == 0) {
+					boolean existe = validarChoqueTurma(key, turma);
+					
+					if(existe == false) {
+						grade[professor][key] = turma + 1;
+						preencheu = true;
+						
+						if(eventos[professor][turma] >= 2) {
+							duracaoAulas[professor][key] = 2;
+							eventos[professor][turma] -= 2;
+						}
+						else {
+							duracaoAulas[professor][key] = 1;
+							eventos[professor][turma] = 0;
+						}
+						
+						break;
+					}
+				}
 			}
-			System.out.println("\n");
-		}*/
+		}
+		
+		if(preencheu == false) {			
+			while (it.hasNext()) {
+				Map.Entry pair = (Map.Entry)it.next();
+
+				int key = (int) pair.getKey();
+
+				if(grade[professor][key] == 0) {
+					grade[professor][key] = turma + 1;
+
+					if(eventos[professor][turma] >= 2) {
+						duracaoAulas[professor][key] = 2;
+						eventos[professor][turma] -= 2;
+					}
+					else {
+						duracaoAulas[professor][key] = 1;
+						eventos[professor][turma] = 0;
+					}
+
+					break;
+				}
+			}
+		}
 		
 		construcao(tamanhoLRC);
 		
@@ -232,6 +276,7 @@ public class GRASP {
 		
 	}
 	
+	// verifica se a turma já está tendo aula com o professor em um determinado dia
 	public boolean validarEspalhamentoTurma(int key, int professor, int turma) {
 		
 		String dia = horarios.get(key).split("_")[0];
@@ -293,6 +338,22 @@ public class GRASP {
 
 		return sortedMap;
 
+	}
+	
+	public List<Integer> criarListaHorariosRandom() {
+
+		List<Integer> horariosRandom = new ArrayList<Integer>();
+		Random random = new Random();
+
+		while(horariosRandom.size() < 25) {
+			int randomKey = random.nextInt(horarios.size());
+
+			if(!horariosRandom.contains(randomKey)) {
+				horariosRandom.add(randomKey);
+			}
+		}
+
+		return horariosRandom;
 	}
 
 }

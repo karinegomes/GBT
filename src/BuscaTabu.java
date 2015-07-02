@@ -134,7 +134,7 @@ public class BuscaTabu {
 		
 		//System.out.println("Nova melhor solução: " + melhorSolucaoVizinho);
 		
-		if(listaTabu.size() > 17) {
+		if(listaTabu.size() > 10) {
 			listaTabu.remove(0);
 		}
 		
