@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,7 @@ public class GRASP {
 	List<String> professores;
 	List<String> classes;
 	List<String> horarios;
+	List<Integer> indicesHorarios;
 	int[][] eventos;
 	int[][] grade;
 	int[][] eventosDivididos;
@@ -33,6 +35,7 @@ public class GRASP {
 		this.professores = professores;
 		this.classes = classes;
 		this.horarios = horarios;
+		indicesHorarios = recuperarIndicesHorarios();
 		grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
 		duracaoAulas = new int[professores.size()][horarios.size()];
 		
@@ -147,7 +150,7 @@ public class GRASP {
 		Map<Integer, Integer> lrc = new TreeMap<Integer, Integer>();
 		List<Integer> turmas = new ArrayList<Integer>();
 		
-		horariosCriticos = recuperarHorariosCriticos();		
+		//horariosCriticos = recuperarHorariosCriticos();		
 		listaProfessores = recuperarListaProfessoresOrdenada();
 		lrc = criarLRC(listaProfessores, tamanhoLRC);
 		
@@ -168,26 +171,27 @@ public class GRASP {
 		Iterator it = horariosCriticos.entrySet().iterator();
 		boolean preencheu = false;
 		
-		//List<Integer> horariosRandom = criarListaHorariosRandom();
+		List<Integer> horariosRandom = criarListaHorariosRandom();
 		
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry)it.next();
+		//while (it.hasNext()) {
+		for(int horarioRandom: horariosRandom) {
+			//Map.Entry pair = (Map.Entry)it.next();
 			
-			int key = (int) pair.getKey();
+			//int key = (int) pair.getKey();
 			
-			if(grade[professor][key] == 0) {
-				boolean existe = validarRestricoes(key, turma, professor);
+			if(grade[professor][horarioRandom] == 0) {
+				boolean existe = validarRestricoes(horarioRandom, turma, professor);
 				
 				if(existe == false) {
-					grade[professor][key] = turma + 1;
+					grade[professor][horarioRandom] = turma + 1;
 					preencheu = true;
 					
 					if(eventos[professor][turma] >= 2) {
-						duracaoAulas[professor][key] = 2;
+						duracaoAulas[professor][horarioRandom] = 2;
 						eventos[professor][turma] -= 2;
 					}
 					else {
-						duracaoAulas[professor][key] = 1;
+						duracaoAulas[professor][horarioRandom] = 1;
 						eventos[professor][turma] = 0;
 					}
 					
@@ -197,24 +201,25 @@ public class GRASP {
 		}
 		
 		if(preencheu == false) {			
-			while (it.hasNext()) {
-				Map.Entry pair = (Map.Entry)it.next();
+			//while (it.hasNext()) {
+			for(int horarioRandom: horariosRandom) {
+				//Map.Entry pair = (Map.Entry)it.next();
 				
-				int key = (int) pair.getKey();
+				//int key = (int) pair.getKey();
 				
-				if(grade[professor][key] == 0) {
-					boolean existe = validarChoqueTurma(key, turma);
+				if(grade[professor][horarioRandom] == 0) {
+					boolean existe = validarChoqueTurma(horarioRandom, turma);
 					
 					if(existe == false) {
-						grade[professor][key] = turma + 1;
+						grade[professor][horarioRandom] = turma + 1;
 						preencheu = true;
 						
 						if(eventos[professor][turma] >= 2) {
-							duracaoAulas[professor][key] = 2;
+							duracaoAulas[professor][horarioRandom] = 2;
 							eventos[professor][turma] -= 2;
 						}
 						else {
-							duracaoAulas[professor][key] = 1;
+							duracaoAulas[professor][horarioRandom] = 1;
 							eventos[professor][turma] = 0;
 						}
 						
@@ -225,20 +230,21 @@ public class GRASP {
 		}
 		
 		if(preencheu == false) {			
-			while (it.hasNext()) {
-				Map.Entry pair = (Map.Entry)it.next();
+			//while (it.hasNext()) {
+			for(int horarioRandom: horariosRandom) {
+				//Map.Entry pair = (Map.Entry)it.next();
 
-				int key = (int) pair.getKey();
+				//int key = (int) pair.getKey();
 
-				if(grade[professor][key] == 0) {
-					grade[professor][key] = turma + 1;
+				if(grade[professor][horarioRandom] == 0) {
+					grade[professor][horarioRandom] = turma + 1;
 
 					if(eventos[professor][turma] >= 2) {
-						duracaoAulas[professor][key] = 2;
+						duracaoAulas[professor][horarioRandom] = 2;
 						eventos[professor][turma] -= 2;
 					}
 					else {
-						duracaoAulas[professor][key] = 1;
+						duracaoAulas[professor][horarioRandom] = 1;
 						eventos[professor][turma] = 0;
 					}
 
@@ -340,9 +346,27 @@ public class GRASP {
 
 	}
 	
+	public List<Integer> recuperarIndicesHorarios() {
+		
+		List<Integer> indiceHorarios = new ArrayList<Integer>();
+		
+		for(String horario: horarios) {
+			indiceHorarios.add(horarios.indexOf(horario));
+		}
+		
+		return indiceHorarios;
+		
+	}
+	
 	public List<Integer> criarListaHorariosRandom() {
+		
+		//List<Integer> indiceHorarios = recuperarIndicesHorarios();
+		
+		Collections.shuffle(indicesHorarios);
+		
+		return indicesHorarios;
 
-		List<Integer> horariosRandom = new ArrayList<Integer>();
+		/*List<Integer> horariosRandom = new ArrayList<Integer>();
 		Random random = new Random();
 
 		while(horariosRandom.size() < 25) {
@@ -353,7 +377,7 @@ public class GRASP {
 			}
 		}
 
-		return horariosRandom;
+		return horariosRandom;*/
 	}
 
 }

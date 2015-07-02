@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -94,21 +95,5 @@ public class GBT {
 		}
 		
 	}
-	
-	/*public List<Integer> criarListaHorariosRandom() {
-		
-		List<Integer> horariosRandom = new ArrayList<Integer>();
-		Random random = new Random();
-		
-		while(horariosRandom.size() < 25) {
-			int randomKey = random.nextInt(horarios.size());
-			
-			if(!horariosRandom.contains(randomKey)) {
-				horariosRandom.add(randomKey);
-			}
-		}
-		
-		return horariosRandom;
-	}*/
 	
 }
