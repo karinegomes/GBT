@@ -49,7 +49,7 @@ public class GBT {
 			grasp = new GRASP(professores, classes, horarios);
 			buscaTabu = new BuscaTabu(professores, classes, horarios, eventos);
 			
-			int[][] solucaoInicial = grasp.construcao(0.5);
+			int[][] solucaoInicial = grasp.construcao(0.4);
 			int[][] duracaoAulasInicial = grasp.recuperarDuracaoAulas();
 			
 			buscaTabu.buscaLocal(solucaoInicial, duracaoAulasInicial);
