@@ -45,14 +45,28 @@ public class GBT {
 		int funcaoObjetivo = 999;
 		int GBTmax = 50;
 		
+		/*long startGrasp = 0;
+		long endGrasp = 0;
+		long startTabu = 0;
+		long endTabu = 0;*/
+		
 		for(int i = 0; i < GBTmax; i++) {		
 			grasp = new GRASP(professores, classes, horarios);
 			buscaTabu = new BuscaTabu(professores, classes, horarios, eventos);
 			
+			//startGrasp = System.currentTimeMillis();
+			
 			int[][] solucaoInicial = grasp.construcao(0.4);
+			
+			//endGrasp = System.currentTimeMillis();
+			
 			int[][] duracaoAulasInicial = grasp.recuperarDuracaoAulas();
 			
+			//startTabu = System.currentTimeMillis();
+			
 			buscaTabu.buscaLocal(solucaoInicial, duracaoAulasInicial);
+			
+			//endTabu = System.currentTimeMillis();
 			
 			if(buscaTabu.melhorSolucao < funcaoObjetivo) {
 				melhorGrade = buscaTabu.melhorGrade;
@@ -72,6 +86,18 @@ public class GBT {
 		System.out.println("----------------------------------------");
 		
 		imprimirGrade(melhorGrade);
+		
+		System.out.println("---------------------------------");
+		
+		imprimirGrade(duracaoAulas);
+		
+		/*System.out.println("-----------------------------------");
+		
+		long totalGrasp = endGrasp - startGrasp;
+		long totalTabu = endTabu - startTabu;
+		
+		System.out.println("Duração Grasp:" + totalGrasp);
+		System.out.println("Duração Tabu: " + totalTabu);*/
 		
 	}
 	

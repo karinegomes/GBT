@@ -26,10 +26,6 @@ public class GRASP {
 	public GRASP(List<String> professores, List<String> classes, List<String> horarios) throws ParserConfigurationException, SAXException, IOException {
 		
 		Parser parser = new Parser("BrazilInstance3.xml");
-		
-		/*professores = parser.recuperarProfessores();
-		classes = parser.recuperarClasses();
-		horarios = parser.recuperarHorarios();*/
 		eventos = parser.recuperarEventos(classes, professores);
 		
 		this.professores = professores;
@@ -39,7 +35,6 @@ public class GRASP {
 		grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
 		duracaoAulas = new int[professores.size()][horarios.size()];
 		
-		//eventosDivididos = parser.restricaoDistribuirEventosDivididos(classes, professores);
 	}
 
 	public TreeMap<Integer, Integer> recuperarHorariosCriticos() {
@@ -142,15 +137,13 @@ public class GRASP {
 		
 	}
 
-	@SuppressWarnings("rawtypes")
 	public int[][] construcao(double tamanhoLRC) {
 
-		Map<Integer, Integer> horariosCriticos = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> listaProfessores = new TreeMap<Integer, Integer>();
 		Map<Integer, Integer> lrc = new TreeMap<Integer, Integer>();
 		List<Integer> turmas = new ArrayList<Integer>();
-		
-		//horariosCriticos = recuperarHorariosCriticos();		
+		Random rand = new Random();
+			
 		listaProfessores = recuperarListaProfessoresOrdenada();
 		lrc = criarLRC(listaProfessores, tamanhoLRC);
 		
@@ -168,17 +161,11 @@ public class GRASP {
 		
 		int turma = escolherTurma(turmas);
 		
-		Iterator it = horariosCriticos.entrySet().iterator();
 		boolean preencheu = false;
 		
 		List<Integer> horariosRandom = criarListaHorariosRandom();
 		
-		//while (it.hasNext()) {
-		for(int horarioRandom: horariosRandom) {
-			//Map.Entry pair = (Map.Entry)it.next();
-			
-			//int key = (int) pair.getKey();
-			
+		for(int horarioRandom: horariosRandom) {			
 			if(grade[professor][horarioRandom] == 0) {
 				boolean existe = validarRestricoes(horarioRandom, turma, professor);
 				
@@ -186,9 +173,20 @@ public class GRASP {
 					grade[professor][horarioRandom] = turma + 1;
 					preencheu = true;
 					
-					if(eventos[professor][turma] >= 2) {
+					/*if(eventos[professor][turma] >= 2) {
 						duracaoAulas[professor][horarioRandom] = 2;
 						eventos[professor][turma] -= 2;
+					}
+					else {
+						duracaoAulas[professor][horarioRandom] = 1;
+						eventos[professor][turma] = 0;
+					}*/
+					
+					if(eventos[professor][turma] >= 2) {
+						int randomNum = rand.nextInt(2) + 1;
+						
+						duracaoAulas[professor][horarioRandom] = randomNum;
+						eventos[professor][turma] -= randomNum;
 					}
 					else {
 						duracaoAulas[professor][horarioRandom] = 1;
@@ -200,13 +198,8 @@ public class GRASP {
 			}
 		}
 		
-		if(preencheu == false) {			
-			//while (it.hasNext()) {
-			for(int horarioRandom: horariosRandom) {
-				//Map.Entry pair = (Map.Entry)it.next();
-				
-				//int key = (int) pair.getKey();
-				
+		if(preencheu == false) {		
+			for(int horarioRandom: horariosRandom) {				
 				if(grade[professor][horarioRandom] == 0) {
 					boolean existe = validarChoqueTurma(horarioRandom, turma);
 					
@@ -229,13 +222,8 @@ public class GRASP {
 			}
 		}
 		
-		if(preencheu == false) {			
-			//while (it.hasNext()) {
+		if(preencheu == false) {		
 			for(int horarioRandom: horariosRandom) {
-				//Map.Entry pair = (Map.Entry)it.next();
-
-				//int key = (int) pair.getKey();
-
 				if(grade[professor][horarioRandom] == 0) {
 					grade[professor][horarioRandom] = turma + 1;
 
@@ -360,24 +348,10 @@ public class GRASP {
 	
 	public List<Integer> criarListaHorariosRandom() {
 		
-		//List<Integer> indiceHorarios = recuperarIndicesHorarios();
-		
 		Collections.shuffle(indicesHorarios);
 		
 		return indicesHorarios;
-
-		/*List<Integer> horariosRandom = new ArrayList<Integer>();
-		Random random = new Random();
-
-		while(horariosRandom.size() < 25) {
-			int randomKey = random.nextInt(horarios.size());
-
-			if(!horariosRandom.contains(randomKey)) {
-				horariosRandom.add(randomKey);
-			}
-		}
-
-		return horariosRandom;*/
+		
 	}
 
 }

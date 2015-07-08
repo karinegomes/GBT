@@ -216,11 +216,10 @@ public class Parser {
 	
 	public int[] restricaoAulasGeminadas(List<String> classes, List<String> professores) {
 		
-		int numClasses = classes.size();
 		int numProfessores = professores.size();
 		
 		int[] aulasGeminadas = new int[numProfessores];
-		int linha = 0, coluna = 0;
+		int linha = 0;
 		
 		NodeList listDistributeSplitEventsConstraint = raiz.getElementsByTagName("DistributeSplitEventsConstraint");
 		
@@ -239,15 +238,6 @@ public class Parser {
 				aulasGeminadas[linha] = minimum;
 			}
 		}
-		
-		/*System.out.println("Eventos divididos:\n");
-		for(int i = 0; i < eventosDivididos.length; i++) {
-			for(int j = 0; j < eventosDivididos[i].length; j++) {
-				System.out.print(eventosDivididos[i][j] + " ");
-			};
-			System.out.println("\n");
-		}
-		System.out.println("\n");*/
 		
 		return aulasGeminadas;
 		

@@ -8,10 +8,6 @@ public class Principal {
 	
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {		
 		
-		/*GRASP grasp = new GRASP();
-		
-		grasp.construcao(0.5);*/
-		
 		long startTime = System.currentTimeMillis();
 		
 		GBT gbt = new GBT();
