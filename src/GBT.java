@@ -1,19 +1,22 @@
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.OutputStream;
 import java.util.List;
-import java.util.Random;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
 public class GBT {
-	
-	// _Q = melhor grade de horários
-	// _f = valor da F.O. da melhor grade de horários
-	// GBTmax = número máximo de iterações
-	// Q0 = grade inicial
 	
 	GRASP grasp;
 	BuscaTabu buscaTabu;
@@ -33,81 +36,61 @@ public class GBT {
 		horarios = parser.recuperarHorarios();
 		eventos = parser.recuperarEventos(classes, professores);
 		gradeInicial = parser.recuperarHorariosIndisponiveis(professores, horarios);
-		
-		//this.grasp = new GRASP(professores, classes, horarios);
-		//this.buscaTabu = new BuscaTabu(professores, classes, horarios, eventos);
 	}
 
 	public void graspTabuSearch() throws ParserConfigurationException, SAXException, IOException {
 		
+		long startCount = System.currentTimeMillis();
+		long endCount = 0;
+		
+		DefaultCategoryDataset ds = new DefaultCategoryDataset();
+		
 		int[][] melhorGrade = null;
 		int[][] duracaoAulas = null;
 		int funcaoObjetivo = 999;
-		int GBTmax = 50;
-		
-		/*long startGrasp = 0;
-		long endGrasp = 0;
-		long startTabu = 0;
-		long endTabu = 0;*/
+		int GBTmax = 500;
 		
 		for(int i = 0; i < GBTmax; i++) {		
 			grasp = new GRASP(professores, classes, horarios);
 			buscaTabu = new BuscaTabu(professores, classes, horarios, eventos);
 			
-			//startGrasp = System.currentTimeMillis();
-			
-			int[][] solucaoInicial = grasp.construcao(0.4);
-			
-			//endGrasp = System.currentTimeMillis();
-			
+			int[][] solucaoInicial = grasp.construcao(0.4);			
 			int[][] duracaoAulasInicial = grasp.recuperarDuracaoAulas();
 			
-			//startTabu = System.currentTimeMillis();
-			
 			buscaTabu.buscaLocal(solucaoInicial, duracaoAulasInicial);
-			
-			//endTabu = System.currentTimeMillis();
 			
 			if(buscaTabu.melhorSolucao < funcaoObjetivo) {
 				melhorGrade = buscaTabu.melhorGrade;
 				duracaoAulas = buscaTabu.duracaoAulas;
 				funcaoObjetivo = buscaTabu.melhorSolucao;
-				
-				//System.out.println("Função de custo: " + funcaoObjetivo);
 			}
 			
-			System.out.println("Função de custo: " + funcaoObjetivo);
+			System.out.println("Função objetivo: " + funcaoObjetivo);
+			
+			endCount = System.currentTimeMillis();
+			
+			long totalCount = (endCount - startCount)/1000;
+			
+			ds.addValue(funcaoObjetivo, "", totalCount + "");
 		}
 		
 		System.out.println("-----------------------------------------");
 		
-		System.out.println(funcaoObjetivo);
+		System.out.println("Melhor função objetivo: " + funcaoObjetivo);
 		
 		System.out.println("----------------------------------------");
 		
 		imprimirGrade(melhorGrade);
 		
-		System.out.println("---------------------------------");
+		//System.out.println("---------------------------------");
 		
-		imprimirGrade(duracaoAulas);
+		//imprimirGrade(duracaoAulas);
 		
-		/*System.out.println("-----------------------------------");
+		JFreeChart grafico = ChartFactory.createLineChart("Resultado", "Tempo (s)", 
+			    "Função objetivo", ds, PlotOrientation.VERTICAL, true, true, false);		 
 		
-		long totalGrasp = endGrasp - startGrasp;
-		long totalTabu = endTabu - startTabu;
-		
-		System.out.println("Duração Grasp:" + totalGrasp);
-		System.out.println("Duração Tabu: " + totalTabu);*/
-		
-	}
-	
-	public int[][] resetarGrade() throws ParserConfigurationException, SAXException, IOException {
-		
-		Parser parser = new Parser("BrazilInstance3.xml");
-		
-		int[][] grade = parser.recuperarHorariosIndisponiveis(professores, horarios);
-		
-		return grade;
+		OutputStream arquivo = new FileOutputStream("grafico.png");
+		ChartUtilities.writeChartAsPNG(arquivo, grafico, 1900, 600);
 		
 	}
 	

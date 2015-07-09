@@ -37,37 +37,6 @@ public class GRASP {
 		
 	}
 
-	public TreeMap<Integer, Integer> recuperarHorariosCriticos() {
-
-		Map<Integer, Integer> horariosCriticos = new HashMap<Integer, Integer>();
-		
-		for(int i = 0; i < grade.length; i++) {
-			for(int j = 0; j < grade[i].length; j++) {
-				if(grade[i][j] == 0) {
-					if(horariosCriticos.get(j) == null) {
-						horariosCriticos.put(j, 1);
-					}
-					else {
-						horariosCriticos.put(j, horariosCriticos.get(j) + 1);
-					}
-				}
-			}
-		}
-
-		/*System.out.println("------------------------------------");
-		printMap(horariosCriticos);*/
-
-		TreeMap<Integer, Integer> horariosCriticosOrdenados = ordenacaoCrescente(horariosCriticos); // horarios criticos ordenados
-		
-		/*System.out.println("--------------------------------");
-		printMap(horariosCriticosOrdenados);*/
-
-		//printMap(sortedMap);
-
-		return horariosCriticosOrdenados;
-
-	}
-
 	public TreeMap<Integer, Integer> recuperarListaProfessoresOrdenada() {
 
 		Map<Integer, Integer> cargaHoraria = new HashMap<Integer, Integer>();
@@ -173,15 +142,6 @@ public class GRASP {
 					grade[professor][horarioRandom] = turma + 1;
 					preencheu = true;
 					
-					/*if(eventos[professor][turma] >= 2) {
-						duracaoAulas[professor][horarioRandom] = 2;
-						eventos[professor][turma] -= 2;
-					}
-					else {
-						duracaoAulas[professor][horarioRandom] = 1;
-						eventos[professor][turma] = 0;
-					}*/
-					
 					if(eventos[professor][turma] >= 2) {
 						int randomNum = rand.nextInt(2) + 1;
 						
@@ -208,8 +168,10 @@ public class GRASP {
 						preencheu = true;
 						
 						if(eventos[professor][turma] >= 2) {
-							duracaoAulas[professor][horarioRandom] = 2;
-							eventos[professor][turma] -= 2;
+							int randomNum = rand.nextInt(2) + 1;
+							
+							duracaoAulas[professor][horarioRandom] = randomNum;
+							eventos[professor][turma] -= randomNum;
 						}
 						else {
 							duracaoAulas[professor][horarioRandom] = 1;
@@ -228,8 +190,10 @@ public class GRASP {
 					grade[professor][horarioRandom] = turma + 1;
 
 					if(eventos[professor][turma] >= 2) {
-						duracaoAulas[professor][horarioRandom] = 2;
-						eventos[professor][turma] -= 2;
+						int randomNum = rand.nextInt(2) + 1;
+						
+						duracaoAulas[professor][horarioRandom] = randomNum;
+						eventos[professor][turma] -= randomNum;
 					}
 					else {
 						duracaoAulas[professor][horarioRandom] = 1;
@@ -253,7 +217,6 @@ public class GRASP {
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry)it.next();
 			System.out.println(pair.getKey() + " = " + pair.getValue());
-			//it.remove(); // avoids a ConcurrentModificationException
 		}
 	}
 	

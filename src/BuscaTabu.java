@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,7 +36,7 @@ public class BuscaTabu {
 		this.horarios = horarios;
 		this.eventos = eventos;
 		this.melhorSolucaoVizinho = 999;
-		//this.aulasGeminadas = parser.restricaoAulasGeminadas(classes, professores);
+		this.aulasGeminadas = parser.restricaoAulasGeminadas(classes, professores);
 		this.maximoDias = parser.restricaoNumeroMaximoDias(professores);
 		this.periodosSemana = recuperarPeriodosSemana();
 	}
@@ -63,13 +64,7 @@ public class BuscaTabu {
 			}
 		}
 		
-		//System.out.println("---------------------------------------------");
-		
-		//System.out.println("Melhor iteração: " + melhorI);
-		
 		listaTabu.clear();
-		
-		//imprimirGrade(melhorGrade);
 		
 	}
 	
@@ -167,10 +162,11 @@ public class BuscaTabu {
 	
 	public int funcaoRestricoesNaoEssenciais(int[][] grade, int[][] duracaoAulas) throws ParserConfigurationException, SAXException, IOException {
 		
-		int restricao1 = 3 * validarRestricaoSemPeriodosOciosos(grade);
-		int restricao2 = 9 * validarRestricaoNumMaxDias(grade, maximoDias);
+		int restricao1 = validarRestricaoAulasGeminadas(grade, duracaoAulas);
+		int restricao2 = 3 * validarRestricaoSemPeriodosOciosos(grade);
+		int restricao3 = 9 * validarRestricaoNumMaxDias(grade, maximoDias);
 		
-		int soma = restricao1 + restricao2;
+		int soma = restricao1 + restricao2 + restricao3;
 		
 		return soma;
 		
@@ -212,21 +208,11 @@ public class BuscaTabu {
 			for(int turma: turmas) {
 				int cargaHoraria = eventos[i][turma];
 				int cargaHorariaTemp = 0;
-				int qtdeDuracao2h = (int) cargaHoraria/2;
-				int qtdeDuracao2hTemp = 0;
 				
 				for(int j = 0; j < Q[i].length; j++) {
 					if(Q[i][j] - 1 == turma) {
 						cargaHorariaTemp += duracaoAulas[i][j];
-						
-						if(duracaoAulas[i][j] == 2) {
-							qtdeDuracao2hTemp++;
-						}
 					}
-				}
-				
-				if(qtdeDuracao2hTemp != qtdeDuracao2h) {
-					violacao++;
 				}
 				
 				if(cargaHorariaTemp != cargaHoraria) {
@@ -322,24 +308,38 @@ public class BuscaTabu {
 	
 	// ------------------------------------- RESTRIÇÕES NÃO-ESSENCIAIS -------------------------------------
 	
-	public void validarRestricaoAulasGeminadas(int[][] grade, int[][] duracaoAulas) {
+	@SuppressWarnings("rawtypes")
+	public int validarRestricaoAulasGeminadas(int[][] grade, int[][] duracaoAulas) {
+		
+		int violacao = 0;
 		
 		for(int i = 0; i < grade.length; i++) {
-			Map<Integer, Integer> bla = new TreeMap<Integer, Integer>();
+			Map<Integer, Integer> qtdeAulasGeminadas = new TreeMap<Integer, Integer>();
 			
 			for(int j = 0; j < grade[i].length; j++) {
+				if(!qtdeAulasGeminadas.containsKey(grade[i][j])) {
+					qtdeAulasGeminadas.put(grade[i][j], 0);
+				}
+				
 				if(duracaoAulas[i][j] == 2) {
-					if(!bla.containsKey(grade[i][j])) {
-						bla.put(grade[i][j], 1);
-					}
-					else {
-						bla.put(grade[i][j], bla.get(grade[i][j]) + 1);
-					}
+					qtdeAulasGeminadas.put(grade[i][j], qtdeAulasGeminadas.get(grade[i][j]) + 1);
 				}
 			}
 			
-			// terminar
+			Iterator it = qtdeAulasGeminadas.entrySet().iterator();
+			
+			while(it.hasNext()) {
+				Map.Entry pair = (Map.Entry) it.next();
+				int value = (int) pair.getValue();
+				
+				if(value != aulasGeminadas[i]) {
+					violacao++;
+				}
+			}
 		}
+		
+		return violacao;
+		
 	}
 	
 	public int validarRestricaoSemPeriodosOciosos(int[][] grade) {
@@ -461,18 +461,6 @@ public class BuscaTabu {
 		array[i][k] = temp;
 		
 		return array;
-		
-	}
-	
-	public void professorTurma() {
-		
-		List<List<Integer>> professorTurma = new ArrayList<List<Integer>>();
-		
-		for(int i = 0; i < eventos.length; i++) {
-			for(int j = 0; j < eventos[i].length; j++) {
-				
-			}
-		}
 		
 	}
 
